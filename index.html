@@ -185,15 +185,18 @@
             else { 
                 target.classList.add('block');
                 
-                // --- KASOWANIE KROPKI NA IKONIE APLIKACJI ---
                 if ('clearAppBadge' in navigator) {
                     navigator.clearAppBadge().catch(console.error);
                 }
             }
         }
 
+        // --- POPRAWKA W WYLOGOWANIU ---
         window.logout = function() {
-            localStorage.clear();
+            // Zamiast localStorage.clear(), usuwamy tylko klucze sesji
+            localStorage.removeItem('userDocId');
+            localStorage.removeItem('companyName');
+            // Zostawiamy 'pushEnabled' oraz 'readMsgs'
             location.reload();
         }
 
@@ -233,16 +236,26 @@
         let verifiedUserId = null; 
         window.currentLiveMessages = [];
 
+        // --- POPRAWKA Z ZIELONĄ LAMPKĄ ---
         function checkAuthStatus() {
             const storedDocId = localStorage.getItem('userDocId');
             const storedCompanyName = localStorage.getItem('companyName');
             const pushEnabled = localStorage.getItem('pushEnabled');
+            const indicator = document.getElementById('status-indicator');
             
             if(storedDocId && storedCompanyName) {
                 verifiedUserId = storedDocId;
                 document.getElementById('user-company-name').innerText = storedCompanyName;
                 window.showScreen('screen-app');
-                if(!pushEnabled) { document.getElementById('push-setup').classList.remove('hidden'); }
+                if(!pushEnabled) { 
+                    document.getElementById('push-setup').classList.remove('hidden');
+                    indicator.classList.remove('bg-green-400');
+                    indicator.classList.add('bg-red-400');
+                } else {
+                    // Skoro włączone, zapalamy zieloną lampkę od razu
+                    indicator.classList.remove('bg-red-400');
+                    indicator.classList.add('bg-green-400');
+                }
             } else {
                 window.showScreen('screen-login');
             }
@@ -254,6 +267,8 @@
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
             const status = document.getElementById('login-status');
+            const indicator = document.getElementById('status-indicator');
+            
             status.innerText = "Sprawdzanie danych...";
             
             try {
@@ -271,7 +286,15 @@
                 
                 document.getElementById('user-company-name').innerText = userDoc.data().companyName;
                 window.showScreen('screen-app');
-                if(!pushEnabled) { document.getElementById('push-setup').classList.remove('hidden'); }
+                
+                if(!pushEnabled) { 
+                    document.getElementById('push-setup').classList.remove('hidden');
+                    indicator.classList.remove('bg-green-400');
+                    indicator.classList.add('bg-red-400');
+                } else {
+                    indicator.classList.remove('bg-red-400');
+                    indicator.classList.add('bg-green-400');
+                }
             } catch (error) { status.innerText = "Błąd połączenia z bazą."; }
         });
 
@@ -369,7 +392,6 @@
             } catch (error) { statusText.innerText = "Błąd generowania klucza."; }
         });
 
-        // 6. RENDEROWANIE Z SYSTEMEM ODCZYTANYCH / NIEODCZYTANYCH
         const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
         onSnapshot(messagesQuery, (snapshot) => {
             if(document.getElementById('list-komunikaty')) {
@@ -380,7 +402,6 @@
             }
             window.currentLiveMessages = [];
 
-            // Pobieramy ID zapisane w telefonie
             const readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
 
             snapshot.forEach((docSnap) => {
@@ -394,12 +415,10 @@
                     const card = document.createElement('div');
                     card.id = `card-${msg.id}`;
                     
-                    // Kolory zmieniają się w zależności od statusu przeczytania
                     const bgClass = isRead ? 'bg-white border-gray-300 text-gray-500' : 'bg-blue-50/50 border-blue-500 text-gray-900';
                     card.className = `p-5 rounded-2xl shadow-md border-l-[6px] cursor-pointer active:scale-[0.98] transition-all relative overflow-visible ${bgClass}`;
                     card.onclick = () => window.openLiveModal(msg.id); 
                     
-                    // Odznaka NOWE dla nieprzeczytanych
                     const unreadBadge = isRead ? '' : `<span id="badge-${msg.id}" class="absolute -top-3 -right-2 bg-red-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md animate-pulse z-10">NOWE</span>`;
 
                     card.innerHTML = `
@@ -418,18 +437,15 @@
             });
         });
 
-        // OBSŁUGA MODALU + ZAPISYWANIE ODCZYTU W TELEFONIE
         window.openLiveModal = function(id) {
             const msg = window.currentLiveMessages.find(m => m.id === id);
             if(!msg) return;
             
-            // Logika zapamiętywania przeczytanej wiadomości
             let readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
             if (!readMsgs.includes(id)) {
                 readMsgs.push(id);
                 localStorage.setItem('readMsgs', JSON.stringify(readMsgs));
                 
-                // Wizualne "zgaszenie" kart na liście w tle
                 const badge = document.getElementById(`badge-${id}`);
                 if (badge) badge.remove();
                 

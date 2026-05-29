@@ -6,57 +6,98 @@
     <title>Centrum B2B</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Ukrywamy scrollbar dla estetyki mobilnej */
         body::-webkit-scrollbar { display: none; }
-        /* Animacja wejścia modalu */
         .modal-enter { animation: fadeIn 0.2s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
-    <div id="screen-onboarding" class="flex flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
+    <div id="screen-login" class="flex flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-            <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Witaj w Centrum B2B</h1>
-            <p class="text-sm text-gray-500 mb-6 text-center">Złóż wniosek o dostęp, aby otrzymywać dedykowane warunki i komunikaty.</p>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Logowanie do B2B</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Wprowadź e-mail i hasło, aby uzyskać dostęp.</p>
 
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Hasło</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition">
+                    Zaloguj się
+                </button>
+                <p id="login-status" class="text-xs text-center text-red-500 mt-2 font-semibold"></p>
+            </form>
+
+            <div class="mt-6 border-t border-gray-100 pt-4 flex flex-col space-y-3">
+                <button onclick="showScreen('screen-activation')" class="text-sm text-blue-600 font-semibold hover:underline text-center">
+                    Masz kod PIN z maila? Aktywuj konto
+                </button>
+                <button onclick="showScreen('screen-register')" class="text-sm text-gray-500 hover:text-gray-800 text-center">
+                    Nie masz konta? Złóż wniosek
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-register" class="hidden flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Wniosek o dostęp</h1>
+            
             <form id="form-register" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Nazwa Firmy</label>
-                    <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">NIP</label>
-                    <input type="text" id="reg-nip" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="reg-nip" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail (na niego wyślemy kod dostępu)</label>
-                    <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail</label>
+                    <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Numer telefonu</label>
-                    <input type="tel" id="reg-phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="tel" id="reg-phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 </div>
-                <button type="submit" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition">
-                    Wyślij wniosek o dostęp
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700">
+                    Wyślij wniosek
                 </button>
                 <p id="reg-status" class="text-xs text-center text-red-500 mt-2"></p>
             </form>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center">Wróć do logowania</button>
+        </div>
+    </div>
 
-            <div id="step-pin" class="hidden flex-col items-center">
-                <div class="bg-blue-50 p-4 rounded-xl w-full text-center mb-6 border border-blue-100">
-                    <p class="text-sm font-medium text-blue-800">Wniosek został przesłany.</p>
-                    <p class="text-xs text-blue-600 mt-1">Po weryfikacji otrzymasz e-mail z kodem aktywacyjnym.</p>
+    <div id="screen-activation" class="hidden flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Aktywacja Konta</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Wpisz e-mail, otrzymany PIN oraz ustal swoje hasło do logowania.</p>
+
+            <form id="form-activation" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail</label>
+                    <input type="email" id="act-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
                 </div>
-                
-                <label class="block text-sm font-semibold text-gray-600 mb-2">Wprowadź 6-cyfrowy kod z wiadomości e-mail</label>
-                <input type="text" id="pin-input" maxlength="6" class="w-full text-center text-2xl tracking-widest px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
-                
-                <button id="btn-verify-pin" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 transition">
-                    Weryfikuj Kod
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">6-cyfrowy PIN od administratora</label>
+                    <input type="text" id="act-pin" maxlength="6" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-center tracking-widest text-xl">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Twoje nowe hasło</label>
+                    <input type="password" id="act-password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                </div>
+                <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 transition">
+                    Aktywuj i ustaw hasło
                 </button>
-                <p id="pin-status" class="text-xs text-center text-red-500 mt-3"></p>
-            </div>
+                <p id="act-status" class="text-xs text-center text-red-500 mt-2 font-semibold"></p>
+            </form>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center">Anuluj</button>
         </div>
     </div>
 
@@ -67,15 +108,16 @@
             <div class="flex items-center space-x-2">
                 <span id="user-company-name" class="text-xs font-medium text-blue-200"></span>
                 <div id="status-indicator" class="w-3 h-3 bg-red-400 rounded-full shadow-inner"></div>
+                <button onclick="logout()" class="ml-2 text-xs bg-blue-800 px-2 py-1 rounded hover:bg-blue-900 cursor-pointer">Wyloguj</button>
             </div>
         </header>
 
         <main class="p-4">
             
-            <div id="push-setup" class="bg-white p-4 rounded-2xl shadow-sm border border-blue-100 mb-4">
-                <p class="text-sm text-gray-700 mb-3 text-center font-medium">Ostatni krok: Aktywuj powiadomienia, aby odbierać wiadomości dla Twojej grupy.</p>
-                <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition">
-                    Włącz Powiadomienia (Wymagane)
+            <div id="push-setup" class="bg-white p-4 rounded-2xl shadow-sm border border-blue-100 mb-4 hidden">
+                <p class="text-sm text-gray-700 mb-3 text-center font-medium">Bądź na bieżąco. Aktywuj powiadomienia dla swojej firmy.</p>
+                <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition cursor-pointer">
+                    Włącz Powiadomienia
                 </button>
                 <p id="push-status-text" class="mt-2 text-xs text-gray-400 text-center"></p>
             </div>
@@ -113,11 +155,9 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                
                 <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-3"></h2>
-                <img id="modal-image" src="" class="w-full h-48 object-cover rounded-xl mb-4 hidden" alt="Zdjęcie do komunikatu">
+                <img id="modal-image" src="" class="w-full h-48 object-cover rounded-xl mb-4 hidden">
                 <p id="modal-body" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
-                
                 <div id="modal-attachments" class="hidden">
                     <h3 class="text-sm font-bold text-gray-800 mb-2">Załączniki:</h3>
                     <div id="attachments-list" class="space-y-2"></div>
@@ -128,126 +168,44 @@
     </div>
 
     <script>
-        // Przełączanie zakładek
+        // Zarządzanie widokami ekranów
+        window.showScreen = function(screenId) {
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-register').classList.add('hidden');
+            document.getElementById('screen-activation').classList.add('hidden');
+            document.getElementById('screen-app').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById(screenId).classList.add('flex'); // Dla formularzy
+        }
+
+        // Wylogowanie
+        window.logout = function() {
+            localStorage.clear();
+            location.reload(); // Przeładowuje stronę i wraca do logowania
+        }
+
         window.switchTab = function(moduleId, clickedBtn) {
             document.querySelectorAll('.app-module').forEach(el => { el.classList.add('hidden'); el.classList.remove('block'); });
             document.getElementById(moduleId).classList.remove('hidden');
             document.getElementById(moduleId).classList.add('block');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600');
-                btn.classList.add('text-gray-400');
-            });
+            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-blue-600'); btn.classList.add('text-gray-400'); });
             clickedBtn.classList.remove('text-gray-400');
             clickedBtn.classList.add('text-blue-600');
         }
-
-        // Baza demonstracyjna
-      // Globalna zmienna do obsługi okienek modalnych (musi być dostępna dla funkcji z HTML-a)
-        window.currentLiveMessages = [];
-
-        // --- POBIERANIE WIADOMOŚCI Z BAZY NA ŻYWO ---
-        // (Musisz upewnić się, że masz zaimportowane onSnapshot u góry w <script type="module">)
-        import { onSnapshot, collection as fsCollection, query as fsQuery, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Pobieramy wiadomości z kolekcji "messages" sortując od najnowszej
-        const messagesQuery = fsQuery(fsCollection(db, "messages"), orderBy("createdAt", "desc"));
         
-        onSnapshot(messagesQuery, (snapshot) => {
-            // Czyścimy widoki wszystkich 4 zakładek, zanim wrzucimy zaktualizowane dane
-            document.getElementById('list-komunikaty').innerHTML = '';
-            document.getElementById('list-promocje').innerHTML = '';
-            document.getElementById('list-iteam').innerHTML = '';
-            document.getElementById('list-szkolenia').innerHTML = '';
-            window.currentLiveMessages = []; // Resetujemy tablicę pomocniczą
-
-            snapshot.forEach((docSnap) => {
-                const msg = docSnap.data();
-                msg.id = docSnap.id; // Dodajemy prawdziwe ID z bazy
-                window.currentLiveMessages.push(msg); // Zapisujemy do modalu
-
-                const listContainer = document.getElementById(`list-${msg.category}`);
-                if (listContainer) {
-                    const card = document.createElement('div');
-                    card.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 cursor-pointer active:bg-gray-50 transition";
-                    // Używamy docSnap.id jako unikalnego identyfikatora do otwarcia szczegółów
-                    card.onclick = () => window.openLiveModal(msg.id); 
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-1">
-                            <h3 class="font-bold text-gray-800 text-sm">${msg.title}</h3>
-                        </div>
-                        <p class="text-xs text-gray-500 mb-2">${msg.preview}</p>
-                        <span class="text-[10px] font-semibold text-gray-400 uppercase">${msg.date}</span>
-                    `;
-                    listContainer.appendChild(card);
-                }
-            });
-        });
-
-        // Nowa funkcja do obsługi okienka modalnego dla danych z bazy
-        window.openLiveModal = function(id) {
-            const msg = window.currentLiveMessages.find(m => m.id === id);
-            if(!msg) return;
-
-            document.getElementById('modal-title').innerText = msg.title;
-            document.getElementById('modal-date').innerText = msg.date;
-            document.getElementById('modal-body').innerText = msg.body;
-
-            // Ukrywamy obrazki i załączniki (na ten moment zrobiliśmy je opcjonalnie)
-            document.getElementById('modal-image').classList.add('hidden');
-            document.getElementById('modal-attachments').classList.add('hidden');
-
-            document.getElementById('message-modal').classList.remove('hidden');
-            document.getElementById('message-modal').classList.add('flex');
-        }
-
-        // Obsługa modalu
-        window.openModal = function(id) {
-            const msg = dbMessages.find(m => m.id === id);
-            if(!msg) return;
-
-            document.getElementById('modal-title').innerText = msg.title;
-            document.getElementById('modal-date').innerText = msg.date;
-            document.getElementById('modal-body').innerText = msg.body;
-
-            const imgEl = document.getElementById('modal-image');
-            if (msg.image) { imgEl.src = msg.image; imgEl.classList.remove('hidden'); } 
-            else { imgEl.classList.add('hidden'); }
-
-            const attContainer = document.getElementById('modal-attachments');
-            const attList = document.getElementById('attachments-list');
-            attList.innerHTML = ''; 
-            
-            if (msg.attachments && msg.attachments.length > 0) {
-                attContainer.classList.remove('hidden');
-                msg.attachments.forEach(file => {
-                    attList.innerHTML += `
-                        <a href="${file.url}" class="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm text-blue-600 font-medium active:bg-gray-100">
-                            <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                            ${file.name}
-                        </a>
-                    `;
-                });
-            } else { attContainer.classList.add('hidden'); }
-
-            document.getElementById('message-modal').classList.remove('hidden');
-            document.getElementById('message-modal').classList.add('flex');
-        }
-
         window.closeModal = function() {
             document.getElementById('message-modal').classList.add('hidden');
             document.getElementById('message-modal').classList.remove('flex');
         }
-
-        renderMessages();
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ
+        const firebaseConfig = {
         const firebaseConfig = {
        apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
   authDomain: "aplikacja-608f2.firebaseapp.com",
@@ -263,29 +221,62 @@
         const messaging = getMessaging(app);
 
         let verifiedUserId = null; 
+        window.currentLiveMessages = [];
 
-        // 1. Sprawdzanie czy użytkownik był już zalogowany (Pamięć lokalna)
-      // 1. Sprawdzanie czy użytkownik był już zalogowany lub oczekuje na PIN
+        // 1. Sprawdzanie czy użytkownik jest już zalogowany
         function checkAuthStatus() {
-            const storedEmail = localStorage.getItem('userEmail');
+            const storedDocId = localStorage.getItem('userDocId'); // Przechowujemy ID dokumentu!
             const storedCompanyName = localStorage.getItem('companyName');
-            const tempEmail = localStorage.getItem('tempEmail'); // Sprawdzamy, czy czeka na PIN
             
-            if(storedEmail && storedCompanyName) {
-                // Pełny dostęp - pokazujemy aplikację
-                document.getElementById('screen-onboarding').classList.add('hidden');
-                document.getElementById('screen-app').classList.remove('hidden');
+            if(storedDocId && storedCompanyName) {
+                verifiedUserId = storedDocId; // Przypisujemy do globalnej zmiennej
                 document.getElementById('user-company-name').innerText = storedCompanyName;
-            } else if (tempEmail) {
-                // Złożył wniosek, ale nie wpisał jeszcze PIN-u - pokazujemy ekran weryfikacji
-                document.getElementById('form-register').classList.add('hidden');
-                document.getElementById('step-pin').classList.remove('hidden');
-                document.getElementById('step-pin').classList.add('flex');
+                window.showScreen('screen-app');
+                document.getElementById('push-setup').classList.remove('hidden'); // Pokazujemy panel PUSH
+            } else {
+                window.showScreen('screen-login');
             }
         }
         checkAuthStatus();
 
-        // 2. Krok A: Zapisywanie wniosku do bazy
+        // 2. LOGOWANIE (Mailem i nowym Hasłem)
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const status = document.getElementById('login-status');
+            
+            status.innerText = "Sprawdzanie danych...";
+            
+            try {
+                // Zapytanie do bazy z zastrzeżeniem, że hasło musi w bazie w ogóle istnieć
+                const q = query(collection(db, "users"), where("email", "==", email), where("password", "==", password));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    status.innerText = "Błędny e-mail lub hasło.";
+                    return;
+                }
+
+                let userDoc = null;
+                querySnapshot.forEach((doc) => { userDoc = doc; });
+
+                // Sukces! Zapisujemy stan w pamięci i idziemy do aplikacji
+                verifiedUserId = userDoc.id;
+                localStorage.setItem('userDocId', userDoc.id);
+                localStorage.setItem('companyName', userDoc.data().companyName);
+                
+                document.getElementById('user-company-name').innerText = userDoc.data().companyName;
+                window.showScreen('screen-app');
+                document.getElementById('push-setup').classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                status.innerText = "Błąd połączenia z bazą.";
+            }
+        });
+
+        // 3. WNIOSEK REJESTRACYJNY (Zapis do bazy jako pending)
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -298,6 +289,7 @@
                 phone: document.getElementById('reg-phone').value,
                 status: 'pending',
                 pin: '',
+                password: '', // Puste, czeka na ustalenie przez usera
                 tags: [],
                 createdAt: new Date()
             };
@@ -306,61 +298,58 @@
                 btn.disabled = true; btn.innerText = "Wysyłanie...";
                 await addDoc(collection(db, "users"), data);
                 
-                document.getElementById('form-register').classList.add('hidden');
-                document.getElementById('step-pin').classList.remove('hidden');
-                document.getElementById('step-pin').classList.add('flex');
-                
-                localStorage.setItem('tempEmail', data.email); 
+                status.className = "text-xs text-center text-green-500 font-bold mt-2";
+                status.innerText = "Wniosek przesłany! Czekaj na e-mail z PINem.";
+                e.target.reset();
+                setTimeout(() => { btn.disabled = false; btn.innerText = "Wyślij wniosek"; }, 3000);
             } catch (error) {
-                console.error(error);
                 status.innerText = "Błąd zapisu. Spróbuj ponownie.";
-                btn.disabled = false; btn.innerText = "Wyślij wniosek o dostęp";
+                btn.disabled = false; btn.innerText = "Wyślij wniosek";
             }
         });
 
-       // 3. Krok B: Weryfikacja przesłanego wniosku po E-mailu i PIN-ie
-document.getElementById('btn-verify-pin').addEventListener('click', async () => {
-            const pinEntered = document.getElementById('pin-input').value.trim();
-            const email = localStorage.getItem('tempEmail');
-            const status = document.getElementById('pin-status');
+        // 4. AKTYWACJA (Sprawdzenie PINu i zapisanie wymyślonego Hasła)
+        document.getElementById('form-activation').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('act-email').value.trim();
+            const pinEntered = document.getElementById('act-pin').value.trim();
+            const newPassword = document.getElementById('act-password').value;
+            const status = document.getElementById('act-status');
             
-            if (!email) { status.innerText = "Brak danych sesji. Wypełnij wniosek ponownie."; return; }
-            if(pinEntered.length !== 6) { status.innerText = "Wprowadź 6-cyfrowy kod."; return; }
-            status.innerText = "Weryfikacja...";
+            status.innerText = "Weryfikacja PINu...";
 
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const querySnapshot = await getDocs(q);
                 
-                // JEŚLI ADMIN USUNĄŁ WNIOSEK Z BAZY:
                 if (querySnapshot.empty) {
-                    alert("Twój wniosek został odrzucony lub usunięty przez administratora.");
-                    localStorage.removeItem('tempEmail'); // Czyścimy pamięć
-                    location.reload(); // Przeładowujemy stronę - wraca formularz
+                    status.innerText = "Nie znaleziono takiego adresu e-mail w bazie.";
                     return;
                 }
 
-                let userDoc = null;
-                let userData = null;
+                let userDoc = null; let userData = null;
                 querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
 
                 if(userData.pin === pinEntered && userData.status === 'approved') {
-                    localStorage.setItem('userEmail', userData.email);
-                    localStorage.setItem('companyName', userData.companyName);
-                    verifiedUserId = userDoc.id; 
+                    // PIN poprawny! Zapisujemy wymyślone hasło do bazy i nadajemy status active
+                    await updateDoc(doc(db, "users", userDoc.id), {
+                        password: newPassword,
+                        status: 'active'
+                    });
 
-                    document.getElementById('screen-onboarding').classList.add('hidden');
-                    document.getElementById('screen-app').classList.remove('hidden');
-                    document.getElementById('user-company-name').innerText = userData.companyName;
+                    alert("Konto aktywne! Możesz się teraz zalogować.");
+                    window.showScreen('screen-login');
+                    document.getElementById('login-email').value = email; // Wpisujemy maila do wygodnego logowania
                 } else {
-                    status.innerText = "Nieprawidłowy PIN lub wniosek czeka na akceptację.";
+                    status.innerText = "Nieprawidłowy PIN lub wniosek niezaakceptowany.";
                 }
             } catch (error) {
                 console.error(error);
                 status.innerText = "Błąd połączenia. Spróbuj ponownie.";
             }
         });
-        // 4. Pobieranie Tokenu Push i przypisywanie do Użytkownika
+
+        // 5. POBIERANIE TOKENU PUSH (Działa poprawnie dzięki verifiedUserId)
         document.getElementById('btn-allow').addEventListener('click', async () => {
             const btnAllow = document.getElementById('btn-allow');
             const setupBox = document.getElementById('push-setup');
@@ -372,28 +361,71 @@ document.getElementById('btn-verify-pin').addEventListener('click', async () => 
                 const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
                 
                 const token = await getToken(messaging, { 
-                                       vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
-  // ⚠️ WKLEJ KLUCZ VAPID
+                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
+ // ⚠️ WKLEJ KLUCZ VAPID
                     serviceWorkerRegistration: registration 
                 });
 
-                // Jeśli użytkownik pomyślnie przeszedł logowanie, zapisujemy token w jego dokumencie
                 if (token && verifiedUserId) {
+                    // Aktualizujemy dokument zalogowanego użytkownika o token
                     const userRef = doc(db, "users", verifiedUserId);
                     await updateDoc(userRef, { pushToken: token });
 
-                    setupBox.style.display = "none"; 
+                    setupBox.classList.add('hidden'); // Ukrywamy ten panel całkowicie
                     indicator.classList.remove('bg-red-400');
                     indicator.classList.add('bg-green-400'); 
-                } else if (token && !verifiedUserId) {
-                    // Sytuacja gdy ktoś odświeżył stronę, był zalogowany z pamięci i nie ma w sesji ID dokumentu
-                    statusText.innerText = "Token wygenerowany. Zaloguj się ponownie by przypisać do konta.";
+                    alert("Super! Od teraz będziesz dostawał powiadomienia na ekran.");
+                } else {
+                    statusText.innerText = "Błąd sesji. Wyloguj się i zaloguj ponownie.";
                 }
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Błąd generowania klucza.";
+                statusText.innerText = "Błąd generowania klucza zabezpieczeń.";
             }
         });
+
+        // 6. POBIERANIE WIADOMOŚCI Z BAZY (Działające na żywo)
+        const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+        onSnapshot(messagesQuery, (snapshot) => {
+            if(document.getElementById('list-komunikaty')) {
+                document.getElementById('list-komunikaty').innerHTML = '';
+                document.getElementById('list-promocje').innerHTML = '';
+                document.getElementById('list-iteam').innerHTML = '';
+                document.getElementById('list-szkolenia').innerHTML = '';
+            }
+            window.currentLiveMessages = [];
+
+            snapshot.forEach((docSnap) => {
+                const msg = docSnap.data();
+                msg.id = docSnap.id;
+                window.currentLiveMessages.push(msg);
+
+                const listContainer = document.getElementById(`list-${msg.category}`);
+                if (listContainer) {
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 cursor-pointer active:bg-gray-50 transition";
+                    card.onclick = () => window.openLiveModal(msg.id); 
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-gray-800 text-sm">${msg.title}</h3>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">${msg.preview}</p>
+                        <span class="text-[10px] font-semibold text-gray-400 uppercase">${msg.date}</span>
+                    `;
+                    listContainer.appendChild(card);
+                }
+            });
+        });
+
+        window.openLiveModal = function(id) {
+            const msg = window.currentLiveMessages.find(m => m.id === id);
+            if(!msg) return;
+            document.getElementById('modal-title').innerText = msg.title;
+            document.getElementById('modal-date').innerText = msg.date;
+            document.getElementById('modal-body').innerText = msg.body;
+            document.getElementById('message-modal').classList.remove('hidden');
+            document.getElementById('message-modal').classList.add('flex');
+        }
 
     </script>
 </body>

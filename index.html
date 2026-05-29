@@ -13,6 +13,9 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
+    <!-- ========================================== -->
+    <!-- EKRAN 0: LOGOWANIE (Domyślny)              -->
+    <!-- ========================================== -->
     <div id="screen-login" class="flex flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Logowanie do B2B</h1>
@@ -27,23 +30,26 @@
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Hasło</label>
                     <input type="password" id="login-password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition">
+                <button type="submit" class="w-full mt-4 bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition cursor-pointer">
                     Zaloguj się
                 </button>
                 <p id="login-status" class="text-xs text-center text-red-500 mt-2 font-semibold"></p>
             </form>
 
             <div class="mt-6 border-t border-gray-100 pt-4 flex flex-col space-y-3">
-                <button onclick="showScreen('screen-activation')" class="text-sm text-blue-600 font-semibold hover:underline text-center">
+                <button onclick="showScreen('screen-activation')" class="text-sm text-blue-600 font-semibold hover:underline text-center cursor-pointer">
                     Masz kod PIN z maila? Aktywuj konto
                 </button>
-                <button onclick="showScreen('screen-register')" class="text-sm text-gray-500 hover:text-gray-800 text-center">
+                <button onclick="showScreen('screen-register')" class="text-sm text-gray-500 hover:text-gray-800 text-center cursor-pointer">
                     Nie masz konta? Złóż wniosek
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- EKRAN 1: REJESTRACJA WNIOSKU               -->
+    <!-- ========================================== -->
     <div id="screen-register" class="hidden flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Wniosek o dostęp</h1>
@@ -51,29 +57,32 @@
             <form id="form-register" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Nazwa Firmy</label>
-                    <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="text" id="reg-name" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">NIP</label>
-                    <input type="text" id="reg-nip" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="text" id="reg-nip" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail</label>
-                    <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="email" id="reg-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Numer telefonu</label>
-                    <input type="tel" id="reg-phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="tel" id="reg-phone" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700">
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition cursor-pointer">
                     Wyślij wniosek
                 </button>
-                <p id="reg-status" class="text-xs text-center text-red-500 mt-2"></p>
+                <p id="reg-status" class="text-xs text-center text-red-500 mt-2 font-semibold"></p>
             </form>
-            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center">Wróć do logowania</button>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center cursor-pointer">Wróć do logowania</button>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- EKRAN 2: AKTYWACJA (PIN -> HASŁO)          -->
+    <!-- ========================================== -->
     <div id="screen-activation" class="hidden flex-col items-center justify-center min-h-screen p-4 bg-blue-600">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
             <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Aktywacja Konta</h1>
@@ -82,25 +91,28 @@
             <form id="form-activation" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Adres E-mail</label>
-                    <input type="email" id="act-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="email" id="act-email" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">6-cyfrowy PIN od administratora</label>
-                    <input type="text" id="act-pin" maxlength="6" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-center tracking-widest text-xl">
+                    <input type="text" id="act-pin" maxlength="6" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-center tracking-widest text-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Twoje nowe hasło</label>
-                    <input type="password" id="act-password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl">
+                    <input type="password" id="act-password" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 transition">
+                <button type="submit" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 transition cursor-pointer">
                     Aktywuj i ustaw hasło
                 </button>
                 <p id="act-status" class="text-xs text-center text-red-500 mt-2 font-semibold"></p>
             </form>
-            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center">Anuluj</button>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-800 text-center cursor-pointer">Anuluj</button>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- EKRAN 3: GŁÓWNA APLIKACJA PWA              -->
+    <!-- ========================================== -->
     <div id="screen-app" class="hidden pb-20">
         
         <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
@@ -122,31 +134,34 @@
                 <p id="push-status-text" class="mt-2 text-xs text-gray-400 text-center"></p>
             </div>
 
+            <!-- Zakładki Aplikacji -->
             <section id="module-komunikaty" class="app-module block"><div id="list-komunikaty" class="space-y-3"></div></section>
             <section id="module-promocje" class="app-module hidden"><div id="list-promocje" class="space-y-3"></div></section>
             <section id="module-iteam" class="app-module hidden"><div id="list-iteam" class="space-y-3"></div></section>
             <section id="module-szkolenia" class="app-module hidden"><div id="list-szkolenia" class="space-y-3"></div></section>
         </main>
 
+        <!-- Dolny Pasek Nawigacji -->
         <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-            <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-600 flex flex-col items-center w-full">
+            <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-600 flex flex-col items-center w-full cursor-pointer">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                 <span class="text-xs font-medium">Komunikaty</span>
             </button>
-            <button onclick="switchTab('module-promocje', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <button onclick="switchTab('module-promocje', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full cursor-pointer">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
                 <span class="text-xs font-medium">Promocje</span>
             </button>
-            <button onclick="switchTab('module-iteam', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <button onclick="switchTab('module-iteam', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full cursor-pointer">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                 <span class="text-xs font-medium">iTeam</span>
             </button>
-            <button onclick="switchTab('module-szkolenia', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <button onclick="switchTab('module-szkolenia', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full cursor-pointer">
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10.243V15a2 2 0 001 1.732l6 3.464l6-3.464A2 2 0 0019 15v-4.757"></path></svg>
                 <span class="text-xs font-medium">Szkolenia</span>
             </button>
         </nav>
 
+        <!-- Okno Modalne -->
         <div id="message-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex-col justify-end">
             <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto modal-enter">
                 <div class="flex justify-between items-center mb-4">
@@ -167,21 +182,28 @@
 
     </div>
 
+    <!-- ========================================== -->
+    <!-- SKRYPTY UI                                 -->
+    <!-- ========================================== -->
     <script>
-        // Zarządzanie widokami ekranów
         window.showScreen = function(screenId) {
             document.getElementById('screen-login').classList.add('hidden');
             document.getElementById('screen-register').classList.add('hidden');
             document.getElementById('screen-activation').classList.add('hidden');
             document.getElementById('screen-app').classList.add('hidden');
-            document.getElementById(screenId).classList.remove('hidden');
-            document.getElementById(screenId).classList.add('flex'); // Dla formularzy
+            
+            const target = document.getElementById(screenId);
+            target.classList.remove('hidden');
+            if (screenId !== 'screen-app') {
+                target.classList.add('flex');
+            } else {
+                target.classList.add('block');
+            }
         }
 
-        // Wylogowanie
         window.logout = function() {
             localStorage.clear();
-            location.reload(); // Przeładowuje stronę i wraca do logowania
+            location.reload();
         }
 
         window.switchTab = function(moduleId, clickedBtn) {
@@ -199,14 +221,16 @@
         }
     </script>
 
+    <!-- ========================================== -->
+    <!-- LOGIKA FIREBASE                            -->
+    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ
-        const firebaseConfig = {
-        const firebaseConfig = {
+        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ Z FIREBASE CONSOLE
+          const firebaseConfig = {
        apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
   authDomain: "aplikacja-608f2.firebaseapp.com",
   projectId: "aplikacja-608f2",
@@ -225,21 +249,21 @@
 
         // 1. Sprawdzanie czy użytkownik jest już zalogowany
         function checkAuthStatus() {
-            const storedDocId = localStorage.getItem('userDocId'); // Przechowujemy ID dokumentu!
+            const storedDocId = localStorage.getItem('userDocId');
             const storedCompanyName = localStorage.getItem('companyName');
             
             if(storedDocId && storedCompanyName) {
-                verifiedUserId = storedDocId; // Przypisujemy do globalnej zmiennej
+                verifiedUserId = storedDocId;
                 document.getElementById('user-company-name').innerText = storedCompanyName;
                 window.showScreen('screen-app');
-                document.getElementById('push-setup').classList.remove('hidden'); // Pokazujemy panel PUSH
+                document.getElementById('push-setup').classList.remove('hidden');
             } else {
                 window.showScreen('screen-login');
             }
         }
         checkAuthStatus();
 
-        // 2. LOGOWANIE (Mailem i nowym Hasłem)
+        // 2. LOGOWANIE (E-mail i Hasło)
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
@@ -249,7 +273,6 @@
             status.innerText = "Sprawdzanie danych...";
             
             try {
-                // Zapytanie do bazy z zastrzeżeniem, że hasło musi w bazie w ogóle istnieć
                 const q = query(collection(db, "users"), where("email", "==", email), where("password", "==", password));
                 const querySnapshot = await getDocs(q);
                 
@@ -261,7 +284,6 @@
                 let userDoc = null;
                 querySnapshot.forEach((doc) => { userDoc = doc; });
 
-                // Sukces! Zapisujemy stan w pamięci i idziemy do aplikacji
                 verifiedUserId = userDoc.id;
                 localStorage.setItem('userDocId', userDoc.id);
                 localStorage.setItem('companyName', userDoc.data().companyName);
@@ -276,7 +298,7 @@
             }
         });
 
-        // 3. WNIOSEK REJESTRACYJNY (Zapis do bazy jako pending)
+        // 3. WNIOSEK REJESTRACYJNY (Status: pending)
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -289,7 +311,7 @@
                 phone: document.getElementById('reg-phone').value,
                 status: 'pending',
                 pin: '',
-                password: '', // Puste, czeka na ustalenie przez usera
+                password: '', 
                 tags: [],
                 createdAt: new Date()
             };
@@ -303,12 +325,13 @@
                 e.target.reset();
                 setTimeout(() => { btn.disabled = false; btn.innerText = "Wyślij wniosek"; }, 3000);
             } catch (error) {
+                status.className = "text-xs text-center text-red-500 mt-2 font-semibold";
                 status.innerText = "Błąd zapisu. Spróbuj ponownie.";
                 btn.disabled = false; btn.innerText = "Wyślij wniosek";
             }
         });
 
-        // 4. AKTYWACJA (Sprawdzenie PINu i zapisanie wymyślonego Hasła)
+        // 4. AKTYWACJA (Sprawdzenie PINu i bezpieczny zapis Hasła)
         document.getElementById('form-activation').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('act-email').value.trim();
@@ -316,13 +339,15 @@
             const newPassword = document.getElementById('act-password').value;
             const status = document.getElementById('act-status');
             
-            status.innerText = "Weryfikacja PINu...";
+            status.className = "text-xs text-center text-blue-600 mt-2 font-semibold";
+            status.innerText = "Weryfikacja danych i zapisywanie hasła w bazie...";
 
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
+                    status.className = "text-xs text-center text-red-500 mt-2 font-semibold";
                     status.innerText = "Nie znaleziono takiego adresu e-mail w bazie.";
                     return;
                 }
@@ -331,27 +356,36 @@
                 querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
 
                 if(userData.pin === pinEntered && userData.status === 'approved') {
-                    // PIN poprawny! Zapisujemy wymyślone hasło do bazy i nadajemy status active
+                    
                     await updateDoc(doc(db, "users", userDoc.id), {
                         password: newPassword,
                         status: 'active'
                     });
 
-                    alert("Konto aktywne! Możesz się teraz zalogować.");
-                    window.showScreen('screen-login');
-                    document.getElementById('login-email').value = email; // Wpisujemy maila do wygodnego logowania
+                    status.className = "text-xs text-center text-green-600 font-bold mt-2 bg-green-50 p-3 rounded-xl border border-green-200 block";
+                    status.innerText = "Konto aktywowane pomyślnie! Za chwilę nastąpi przekierowanie do logowania...";
+
+                    setTimeout(() => {
+                        window.showScreen('screen-login');
+                        document.getElementById('login-email').value = email; 
+                        status.innerText = ""; 
+                        status.className = "text-xs text-center text-red-500 mt-2 font-semibold"; 
+                    }, 2500);
+
                 } else {
-                    status.innerText = "Nieprawidłowy PIN lub wniosek niezaakceptowany.";
+                    status.className = "text-xs text-center text-red-500 mt-2 font-semibold";
+                    status.innerText = "Nieprawidłowy PIN lub wniosek nie został jeszcze zatwierdzony.";
                 }
             } catch (error) {
                 console.error(error);
-                status.innerText = "Błąd połączenia. Spróbuj ponownie.";
+                status.className = "text-xs text-center text-red-600 mt-2 font-bold bg-red-50 p-3 rounded-xl border border-red-200 block text-left overflow-x-auto";
+                status.innerText = "BŁĄD ZAPISU BAZY:
+" + error.message;
             }
         });
 
-        // 5. POBIERANIE TOKENU PUSH (Działa poprawnie dzięki verifiedUserId)
+        // 5. POBIERANIE TOKENU PUSH
         document.getElementById('btn-allow').addEventListener('click', async () => {
-            const btnAllow = document.getElementById('btn-allow');
             const setupBox = document.getElementById('push-setup');
             const statusText = document.getElementById('push-status-text');
             const indicator = document.getElementById('status-indicator');
@@ -361,30 +395,28 @@
                 const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
                 
                 const token = await getToken(messaging, { 
-                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
- // ⚠️ WKLEJ KLUCZ VAPID
+ vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',// ⚠️ WKLEJ KLUCZ VAPID
                     serviceWorkerRegistration: registration 
                 });
 
                 if (token && verifiedUserId) {
-                    // Aktualizujemy dokument zalogowanego użytkownika o token
                     const userRef = doc(db, "users", verifiedUserId);
                     await updateDoc(userRef, { pushToken: token });
 
-                    setupBox.classList.add('hidden'); // Ukrywamy ten panel całkowicie
+                    setupBox.classList.add('hidden'); 
                     indicator.classList.remove('bg-red-400');
                     indicator.classList.add('bg-green-400'); 
-                    alert("Super! Od teraz będziesz dostawał powiadomienia na ekran.");
+                    alert("Super! Powiadomienia zostały aktywowane.");
                 } else {
-                    statusText.innerText = "Błąd sesji. Wyloguj się i zaloguj ponownie.";
+                    statusText.innerText = "Błąd sesji. Zaloguj się ponownie.";
                 }
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Błąd generowania klucza zabezpieczeń.";
+                statusText.innerText = "Błąd generowania klucza.";
             }
         });
 
-        // 6. POBIERANIE WIADOMOŚCI Z BAZY (Działające na żywo)
+        // 6. POBIERANIE WIADOMOŚCI Z BAZY NA ŻYWO
         const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
         onSnapshot(messagesQuery, (snapshot) => {
             if(document.getElementById('list-komunikaty')) {
@@ -426,7 +458,6 @@
             document.getElementById('message-modal').classList.remove('hidden');
             document.getElementById('message-modal').classList.add('flex');
         }
-
     </script>
 </body>
 </html>

@@ -279,45 +279,66 @@
             }
         });
 
-        // 3. Krok B: Weryfikacja przesłanego wniosku po E-mailu i PIN-ie
-        document.getElementById('btn-verify-pin').addEventListener('click', async () => {
-            const pinEntered = document.getElementById('pin-input').value;
-            const email = localStorage.getItem('tempEmail');
-            const status = document.getElementById('pin-status');
+       // 3. Krok B: Weryfikacja przesłanego wniosku po E-mailu i PIN-ie
+document.getElementById('btn-verify-pin').addEventListener('click', async () => {
+    // Używamy trim(), aby usunąć ewentualne niewidoczne spacje na końcu
+    const pinEntered = document.getElementById('pin-input').value.trim();
+    const email = localStorage.getItem('tempEmail');
+    const status = document.getElementById('pin-status');
+    
+    // Zabezpieczenie: czy telefon w ogóle pamięta e-mail z poprzedniego kroku?
+    if (!email) {
+        alert("BŁĄD LOKALNY: Twój telefon zapomniał adresu e-mail (odświeżyłeś stronę?). Wypełnij wniosek jeszcze raz.");
+        return;
+    }
+
+    if(pinEntered.length !== 6) { status.innerText = "Wprowadź 6-cyfrowy kod."; return; }
+    status.innerText = "Weryfikacja...";
+
+    try {
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            alert("BŁĄD ZAPYTANIA:\nSzukałem w bazie e-maila: " + email + "\nAle baza mówi, że nie ma takiego dokumentu!");
+            status.innerText = "Nie znaleziono wniosku w bazie.";
+            return;
+        }
+
+        let userDoc = null;
+        let userData = null;
+        querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
+
+        // === GŁÓWNE OKNO DIAGNOSTYCZNE ===
+        alert(
+            "WYNIKI Z BAZY FIREBASE:\n\n" +
+            "1. E-mail w bazie: '" + userData.email + "'\n" +
+            "2. Status w bazie: '" + userData.status + "'\n" +
+            "3. PIN w bazie: '" + userData.pin + "' (Typ danych: " + typeof userData.pin + ")\n\n" +
+            "TO CO WPISAŁEŚ:\n" +
+            "Wpisany PIN: '" + pinEntered + "'"
+        );
+
+        // Sprawdzamy zgodność i status
+        if(userData.pin === pinEntered && userData.status === 'approved') {
+            localStorage.setItem('userEmail', userData.email);
+            localStorage.setItem('companyName', userData.companyName);
+            verifiedUserId = userDoc.id; 
+
+            document.getElementById('screen-onboarding').classList.add('hidden');
+            document.getElementById('screen-app').classList.remove('hidden');
+            document.getElementById('user-company-name').innerText = userData.companyName;
             
-            if(pinEntered.length !== 6) { status.innerText = "Wprowadź 6-cyfrowy kod."; return; }
-            status.innerText = "Weryfikacja...";
-
-            try {
-                const q = query(collection(db, "users"), where("email", "==", email));
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    status.innerText = "Nie znaleziono wniosku. Odśwież i wypełnij ponownie.";
-                    return;
-                }
-
-                let userDoc = null;
-                let userData = null;
-                querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
-
-                // Sprawdzamy zgodność i status
-                if(userData.pin === pinEntered && userData.status === 'approved') {
-                    localStorage.setItem('userEmail', userData.email);
-                    localStorage.setItem('companyName', userData.companyName);
-                    verifiedUserId = userDoc.id; 
-
-                    document.getElementById('screen-onboarding').classList.add('hidden');
-                    document.getElementById('screen-app').classList.remove('hidden');
-                    document.getElementById('user-company-name').innerText = userData.companyName;
-                } else {
-                    status.innerText = "Nieprawidłowy PIN lub wniosek niezaakceptowany.";
-                }
-            } catch (error) {
-                console.error(error);
-                status.innerText = "Błąd połączenia. Spróbuj ponownie.";
-            }
-        });
+            alert("SUKCES! Autoryzacja poprawna.");
+        } else {
+            status.innerText = "Nieprawidłowy PIN lub wniosek niezaakceptowany.";
+        }
+    } catch (error) {
+        console.error(error);
+        alert("BŁĄD KRYTYCZNY: " + error.message);
+        status.innerText = "Błąd połączenia. Spróbuj ponownie.";
+    }
+});
 
         // 4. Pobieranie Tokenu Push i przypisywanie do Użytkownika
         document.getElementById('btn-allow').addEventListener('click', async () => {

@@ -3,31 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PWA Użytkownik</title>
-    <!-- Manifest dla PWA (możesz dodać plik manifest.json) -->
-    <link rel="manifest" href="manifest.json">
+    <title>Firmowe PWA</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Ukrywamy scrollbar dla estetyki aplikacji mobilnej */
+        body::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-20">
 
-    <div class="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">Aplikacja Powiadomienia - PUSH</h1>
-        <p class="text-gray-600 mb-6">Wersja testowa IB</p>
-        
-        <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition cursor-pointer">
-            Włącz Powiadomienia Push
+    <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
+        <h1 class="text-lg font-bold">Panel Pracownika</h1>
+        <div id="status-indicator" class="w-3 h-3 bg-red-400 rounded-full shadow-inner"></div>
+    </header>
+
+    <main class="p-4">
+
+        <section id="module-messages" class="app-module block">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Tablica ogłoszeń</h2>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
+                <p class="text-sm text-gray-500 mb-3">System powiadomień Push</p>
+                <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition">
+                    Aktywuj Odbiornik
+                </button>
+                <p id="status" class="mt-2 text-xs text-gray-400 text-center">Moduł nieaktywny</p>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 mb-3">
+                <div class="flex justify-between items-start mb-1">
+                    <h3 class="font-bold text-gray-800">Aktualizacja systemu</h3>
+                    <span class="text-xs text-gray-400">Dziś, 10:30</span>
+                </div>
+                <p class="text-sm text-gray-600">Aplikacja została zaktualizowana do wersji modułowej.</p>
+            </div>
+        </section>
+
+        <section id="module-b2b" class="app-module hidden">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Analiza sprzedaży B2B</h2>
+            
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-2">Marże kwartalne</h3>
+                <div class="h-32 bg-gray-100 rounded-lg flex items-end p-2 space-x-2">
+                    <div class="bg-blue-300 w-1/4 h-1/2 rounded-t-sm"></div>
+                    <div class="bg-blue-400 w-1/4 h-3/4 rounded-t-sm"></div>
+                    <div class="bg-blue-500 w-1/4 h-full rounded-t-sm"></div>
+                    <div class="bg-blue-600 w-1/4 h-5/6 rounded-t-sm"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 text-center">Dane symulacyjne dla klientów kluczowych</p>
+            </div>
+        </section>
+
+        <section id="module-procurement" class="app-module hidden">
+            <h2 class="text-xl font-bold mb-4 text-gray-700">Warunki zakupowe</h2>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-sm">
+                            <th class="p-3 border-b">Dostawca</th>
+                            <th class="p-3 border-b">Rabat</th>
+                            <th class="p-3 border-b">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr>
+                            <td class="p-3 border-b font-medium text-gray-800">Dostawca A</td>
+                            <td class="p-3 border-b text-green-600 font-bold">15%</td>
+                            <td class="p-3 border-b"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Aktywne</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium text-gray-800">Dostawca B</td>
+                            <td class="p-3 text-green-600 font-bold">8%</td>
+                            <td class="p-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs">Negocjacje</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+        <button onclick="switchTab('module-messages', this)" class="nav-btn text-blue-600 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span class="text-xs font-medium">Komunikaty</span>
         </button>
-        
-        <p id="status" class="mt-4 text-sm text-gray-500">Oczekiwanie na zgodę...</p>
-    </div>
+        <button onclick="switchTab('module-b2b', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span class="text-xs font-medium">Analiza B2B</span>
+        </button>
+        <button onclick="switchTab('module-procurement', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span class="text-xs font-medium">Zakupy</span>
+        </button>
+    </nav>
 
-    <!-- Moduły Firebase -->
+    <script>
+        function switchTab(moduleId, clickedBtn) {
+            // Ukryj wszystkie moduły
+            document.querySelectorAll('.app-module').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Pokaż wybrany moduł
+            document.getElementById(moduleId).classList.remove('hidden');
+            document.getElementById(moduleId).classList.add('block');
+
+            // Resetuj kolory przycisków
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-gray-400');
+            });
+            // Podświetl kliknięty przycisk
+            clickedBtn.classList.remove('text-gray-400');
+            clickedBtn.classList.add('text-blue-600');
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ Z FIREBASE
+        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ
         const firebaseConfig = {
   apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
   authDomain: "aplikacja-608f2.firebaseapp.com",
@@ -45,40 +144,34 @@
 
         const btnAllow = document.getElementById('btn-allow');
         const statusText = document.getElementById('status');
+        const indicator = document.getElementById('status-indicator');
 
         btnAllow.addEventListener('click', async () => {
             try {
-                statusText.innerText = "Prośba o uprawnienia...";
-                // Rejestracja ukrytego skryptu tła (Service Workera)
+                statusText.innerText = "Łączenie z serwerem...";
                 const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
                 
-                // Pobranie unikalnego tokenu urządzenia (Wklej tu swój wygenerowany klucz VAPID)
                 const token = await getToken(messaging, { 
                     vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
+ // ⚠️ WKLEJ KLUCZ VAPID
                     serviceWorkerRegistration: registration 
                 });
 
                 if (token) {
-                    statusText.innerText = "Uzyskano token! Zapisuję w bazie...";
-                    
-                    // Zapisujemy token w bazie danych Firestore
                     await addDoc(collection(db, "device_tokens"), {
                         token: token,
                         device: navigator.userAgent,
                         createdAt: new Date()
                     });
 
-                    statusText.innerText = "Połączono! Możesz teraz odebrać komunikat.";
-                    statusText.className = "mt-4 text-sm text-green-600 font-medium";
-                    btnAllow.disabled = true;
-                    btnAllow.className = "w-full bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl cursor-not-allowed";
-                } else {
-                    statusText.innerText = "Nie udało się pobrać tokenu.";
+                    statusText.innerText = "Urządzenie zsynchronizowane. Oczekuję na dane.";
+                    btnAllow.style.display = "none"; // Ukrywamy przycisk po sukcesie
+                    indicator.classList.remove('bg-red-400');
+                    indicator.classList.add('bg-green-400'); // Zielona lampka na górze
                 }
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Błąd: " + error.message;
-                statusText.className = "mt-4 text-sm text-red-600";
+                statusText.innerText = "Błąd połączenia";
             }
         });
     </script>

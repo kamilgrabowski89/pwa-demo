@@ -6,129 +6,211 @@
     <title>Firmowe PWA</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        /* Ukrywamy scrollbar dla estetyki aplikacji mobilnej */
         body::-webkit-scrollbar { display: none; }
+        /* Animacja wejścia modalu */
+        .modal-enter { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased pb-20">
 
     <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
-        <h1 class="text-lg font-bold">Panel Pracownika</h1>
+        <h1 class="text-lg font-bold">Centrum Informacji</h1>
         <div id="status-indicator" class="w-3 h-3 bg-red-400 rounded-full shadow-inner"></div>
     </header>
 
     <main class="p-4">
+        <div id="push-setup" class="bg-white p-4 rounded-2xl shadow-sm border border-blue-100 mb-4">
+            <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition">
+                Aktywuj Powiadomienia
+            </button>
+            <p id="status" class="mt-2 text-xs text-gray-400 text-center">Wymagane do odbioru komunikatów na żywo</p>
+        </div>
 
-        <section id="module-messages" class="app-module block">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Tablica ogłoszeń</h2>
-            
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-4">
-                <p class="text-sm text-gray-500 mb-3">System powiadomień Push</p>
-                <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition">
-                    Aktywuj Odbiornik
-                </button>
-                <p id="status" class="mt-2 text-xs text-gray-400 text-center">Moduł nieaktywny</p>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 mb-3">
-                <div class="flex justify-between items-start mb-1">
-                    <h3 class="font-bold text-gray-800">Aktualizacja systemu</h3>
-                    <span class="text-xs text-gray-400">Dziś, 10:30</span>
-                </div>
-                <p class="text-sm text-gray-600">Aplikacja została zaktualizowana do wersji modułowej.</p>
-            </div>
-        </section>
-
-        <section id="module-b2b" class="app-module hidden">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Analiza sprzedaży B2B</h2>
-            
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="font-bold text-gray-800 mb-2">Marże kwartalne</h3>
-                <div class="h-32 bg-gray-100 rounded-lg flex items-end p-2 space-x-2">
-                    <div class="bg-blue-300 w-1/4 h-1/2 rounded-t-sm"></div>
-                    <div class="bg-blue-400 w-1/4 h-3/4 rounded-t-sm"></div>
-                    <div class="bg-blue-500 w-1/4 h-full rounded-t-sm"></div>
-                    <div class="bg-blue-600 w-1/4 h-5/6 rounded-t-sm"></div>
-                </div>
-                <p class="text-xs text-gray-500 mt-3 text-center">Dane symulacyjne dla klientów kluczowych</p>
-            </div>
-        </section>
-
-        <section id="module-procurement" class="app-module hidden">
-            <h2 class="text-xl font-bold mb-4 text-gray-700">Warunki zakupowe</h2>
-            
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 text-sm">
-                            <th class="p-3 border-b">Dostawca</th>
-                            <th class="p-3 border-b">Rabat</th>
-                            <th class="p-3 border-b">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm">
-                        <tr>
-                            <td class="p-3 border-b font-medium text-gray-800">Dostawca A</td>
-                            <td class="p-3 border-b text-green-600 font-bold">15%</td>
-                            <td class="p-3 border-b"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Aktywne</span></td>
-                        </tr>
-                        <tr>
-                            <td class="p-3 font-medium text-gray-800">Dostawca B</td>
-                            <td class="p-3 text-green-600 font-bold">8%</td>
-                            <td class="p-3"><span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs">Negocjacje</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
+        <section id="module-komunikaty" class="app-module block"><div id="list-komunikaty" class="space-y-3"></div></section>
+        <section id="module-promocje" class="app-module hidden"><div id="list-promocje" class="space-y-3"></div></section>
+        <section id="module-iteam" class="app-module hidden"><div id="list-iteam" class="space-y-3"></div></section>
+        <section id="module-szkolenia" class="app-module hidden"><div id="list-szkolenia" class="space-y-3"></div></section>
     </main>
 
     <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
-        <button onclick="switchTab('module-messages', this)" class="nav-btn text-blue-600 flex flex-col items-center w-full">
+        <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-600 flex flex-col items-center w-full">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
             <span class="text-xs font-medium">Komunikaty</span>
         </button>
-        <button onclick="switchTab('module-b2b', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            <span class="text-xs font-medium">Analiza B2B</span>
+        <button onclick="switchTab('module-promocje', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+            <span class="text-xs font-medium">Promocje</span>
         </button>
-        <button onclick="switchTab('module-procurement', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span class="text-xs font-medium">Zakupy</span>
+        <button onclick="switchTab('module-iteam', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <span class="text-xs font-medium">iTeam</span>
+        </button>
+        <button onclick="switchTab('module-szkolenia', this)" class="nav-btn text-gray-400 flex flex-col items-center w-full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10.243V15a2 2 0 001 1.732l6 3.464l6-3.464A2 2 0 0019 15v-4.757"></path></svg>
+            <span class="text-xs font-medium">Szkolenia</span>
         </button>
     </nav>
 
-    <script>
-        function switchTab(moduleId, clickedBtn) {
-            // Ukryj wszystkie moduły
-            document.querySelectorAll('.app-module').forEach(el => {
-                el.classList.add('hidden');
-                el.classList.remove('block');
-            });
-            // Pokaż wybrany moduł
-            document.getElementById(moduleId).classList.remove('hidden');
-            document.getElementById(moduleId).classList.add('block');
+    <div id="message-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex-col justify-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto modal-enter">
+            <div class="flex justify-between items-center mb-4">
+                <span id="modal-date" class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md"></span>
+                <button onclick="closeModal()" class="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-3"></h2>
+            
+            <img id="modal-image" src="" class="w-full h-48 object-cover rounded-xl mb-4 hidden" alt="Zdjęcie do komunikatu">
+            
+            <p id="modal-body" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
+            
+            <div id="modal-attachments" class="hidden">
+                <h3 class="text-sm font-bold text-gray-800 mb-2">Załączniki:</h3>
+                <div id="attachments-list" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
 
-            // Resetuj kolory przycisków
+    <script>
+        // 1. Zmiana zakładek
+        function switchTab(moduleId, clickedBtn) {
+            document.querySelectorAll('.app-module').forEach(el => el.classList.add('hidden'));
+            document.getElementById(moduleId).classList.remove('hidden');
+
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-blue-600');
                 btn.classList.add('text-gray-400');
             });
-            // Podświetl kliknięty przycisk
             clickedBtn.classList.remove('text-gray-400');
             clickedBtn.classList.add('text-blue-600');
         }
+
+        // 2. Symulacyjna baza danych (Lokalna historia dla prezentacji zarządu)
+        const dbMessages = [
+            {
+                id: 1,
+                category: "komunikaty",
+                title: "Fuzja Centralbud i Instalbud",
+                date: "29 Maj 2026",
+                preview: "Aktualizacja statusu integracji prawnej obu spółek.",
+                body: "Informujemy, że proces przejęcia i połączenia struktur Centralbud i Instalbud wchodzi w decydującą fazę. Prosimy o zapoznanie się ze schematem nowej struktury organizacyjnej.",
+                image: "https://images.unsplash.com/photo-1556761175-5973dc0f32d7?auto=format&fit=crop&w=800&q=80",
+                attachments: [{ name: "schemat_fuzji.pdf", url: "#" }]
+            },
+            {
+                id: 2,
+                category: "promocje",
+                title: "Nowe warunki B2B - Technika Grzewcza",
+                date: "28 Maj 2026",
+                preview: "Zaktualizowane marże na asortyment sanitarny i grzewczy.",
+                body: "Od przyszłego miesiąca wchodzą w życie nowe rabaty dla klientów kluczowych. Prosimy zaktualizować cenniki ofertowe na pompy ciepła i systemy instalacyjne.",
+                image: "",
+                attachments: [{ name: "cennik_B2B_czerwiec.xlsx", url: "#" }, { name: "ulotka_promocyjna.pdf", url: "#" }]
+            },
+            {
+                id: 3,
+                category: "iteam",
+                title: "Aktualizacja makr VBA",
+                date: "25 Maj 2026",
+                preview: "Wdrożono nowe skrypty do automatyzacji analizy marż.",
+                body: "Dział IT przygotował nowe narzędzia w Excelu. Skrypty VBA automatyzują pobieranie danych sprzedażowych i wyliczanie ostatecznych warunków zakupowych dla klientów B2B.",
+                image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+                attachments: [{ name: "instrukcja_vba.docx", url: "#" }]
+            },
+            {
+                id: 4,
+                category: "szkolenia",
+                title: "Szkolenie: Nowoczesne rozwiązania sanitarne",
+                date: "20 Maj 2026",
+                preview: "Zapisy na czerwcowe warsztaty dla działu handlowego.",
+                body: "Obowiązkowe szkolenie produktowe dla handlowców omawiające najnowsze technologie w branży instalacyjnej.",
+                image: "",
+                attachments: []
+            }
+        ];
+
+        // 3. Generowanie list w odpowiednich zakładkach
+        function renderMessages() {
+            dbMessages.forEach(msg => {
+                const listContainer = document.getElementById(`list-${msg.category}`);
+                if (listContainer) {
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 cursor-pointer active:bg-gray-50 transition";
+                    card.onclick = () => openModal(msg.id);
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-gray-800 text-sm">${msg.title}</h3>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-2">${msg.preview}</p>
+                        <span class="text-[10px] font-semibold text-gray-400 uppercase">${msg.date}</span>
+                    `;
+                    listContainer.appendChild(card);
+                }
+            });
+        }
+
+        // 4. Obsługa okienka modalnego
+        function openModal(id) {
+            const msg = dbMessages.find(m => m.id === id);
+            if(!msg) return;
+
+            document.getElementById('modal-title').innerText = msg.title;
+            document.getElementById('modal-date').innerText = msg.date;
+            document.getElementById('modal-body').innerText = msg.body;
+
+            // Obsługa obrazka
+            const imgEl = document.getElementById('modal-image');
+            if (msg.image) {
+                imgEl.src = msg.image;
+                imgEl.classList.remove('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+            }
+
+            // Obsługa załączników
+            const attContainer = document.getElementById('modal-attachments');
+            const attList = document.getElementById('attachments-list');
+            attList.innerHTML = ''; // czyszczenie poprzednich
+            
+            if (msg.attachments && msg.attachments.length > 0) {
+                attContainer.classList.remove('hidden');
+                msg.attachments.forEach(file => {
+                    attList.innerHTML += `
+                        <a href="${file.url}" class="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-100 text-sm text-blue-600 font-medium active:bg-gray-100">
+                            <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            ${file.name}
+                        </a>
+                    `;
+                });
+            } else {
+                attContainer.classList.add('hidden');
+            }
+
+            // Pokaż modal
+            document.getElementById('message-modal').classList.remove('hidden');
+            document.getElementById('message-modal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('message-modal').classList.add('hidden');
+            document.getElementById('message-modal').classList.remove('flex');
+        }
+
+        // Uruchom generowanie widoku po załadowaniu
+        renderMessages();
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ
         const firebaseConfig = {
-  apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
+       apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
   authDomain: "aplikacja-608f2.firebaseapp.com",
   projectId: "aplikacja-608f2",
   storageBucket: "aplikacja-608f2.firebasestorage.app",
@@ -143,6 +225,7 @@
         const messaging = getMessaging(app);
 
         const btnAllow = document.getElementById('btn-allow');
+        const setupBox = document.getElementById('push-setup');
         const statusText = document.getElementById('status');
         const indicator = document.getElementById('status-indicator');
 
@@ -152,8 +235,8 @@
                 const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
                 
                 const token = await getToken(messaging, { 
-                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
- // ⚠️ WKLEJ KLUCZ VAPID
+		  vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',
+	 // ⚠️ WKLEJ KLUCZ VAPID
                     serviceWorkerRegistration: registration 
                 });
 
@@ -164,15 +247,22 @@
                         createdAt: new Date()
                     });
 
-                    statusText.innerText = "Urządzenie zsynchronizowane. Oczekuję na dane.";
-                    btnAllow.style.display = "none"; // Ukrywamy przycisk po sukcesie
+                    // Po sukcesie chowamy panel zgody
+                    setupBox.style.display = "none"; 
                     indicator.classList.remove('bg-red-400');
-                    indicator.classList.add('bg-green-400'); // Zielona lampka na górze
+                    indicator.classList.add('bg-green-400'); 
                 }
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Błąd połączenia";
+                statusText.innerText = "Błąd połączenia. Spróbuj ponownie.";
             }
+        });
+
+        // Nasłuchiwanie nowych wiadomości gdy aplikacja jest OTWARTA (opcjonalnie do rozbudowy)
+        onMessage(messaging, (payload) => {
+            console.log('Otrzymano wiadomość (aplikacja otwarta): ', payload);
+            alert("Nowa wiadomość: " + payload.notification.title);
+            // Tutaj docelowo można dodać kod wstawiający nową wiadomość bezpośrednio do tablicy dbMessages i odświeżający widok.
         });
     </script>
 </body>

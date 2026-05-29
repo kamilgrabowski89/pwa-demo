@@ -124,10 +124,10 @@
                 <p id="push-status-text" class="mt-3 text-sm text-gray-500 text-center font-medium"></p>
             </div>
 
-            <section id="module-komunikaty" class="app-module block"><div id="list-komunikaty" class="space-y-4"></div></section>
-            <section id="module-promocje" class="app-module hidden"><div id="list-promocje" class="space-y-4"></div></section>
-            <section id="module-iteam" class="app-module hidden"><div id="list-iteam" class="space-y-4"></div></section>
-            <section id="module-szkolenia" class="app-module hidden"><div id="list-szkolenia" class="space-y-4"></div></section>
+            <section id="module-komunikaty" class="app-module block"><div id="list-komunikaty" class="space-y-5 mt-2"></div></section>
+            <section id="module-promocje" class="app-module hidden"><div id="list-promocje" class="space-y-5 mt-2"></div></section>
+            <section id="module-iteam" class="app-module hidden"><div id="list-iteam" class="space-y-5 mt-2"></div></section>
+            <section id="module-szkolenia" class="app-module hidden"><div id="list-szkolenia" class="space-y-5 mt-2"></div></section>
         </main>
 
         <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around py-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-20 pb-safe">
@@ -182,7 +182,14 @@
             const target = document.getElementById(screenId);
             target.classList.remove('hidden');
             if (screenId !== 'screen-app') { target.classList.add('flex'); } 
-            else { target.classList.add('block'); }
+            else { 
+                target.classList.add('block');
+                
+                // --- KASOWANIE KROPKI NA IKONIE APLIKACJI ---
+                if ('clearAppBadge' in navigator) {
+                    navigator.clearAppBadge().catch(console.error);
+                }
+            }
         }
 
         window.logout = function() {
@@ -362,7 +369,7 @@
             } catch (error) { statusText.innerText = "Błąd generowania klucza."; }
         });
 
-        // 6. RENDEROWANIE POWIĘKSZONYCH KART WIADOMOŚCI
+        // 6. RENDEROWANIE Z SYSTEMEM ODCZYTANYCH / NIEODCZYTANYCH
         const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
         onSnapshot(messagesQuery, (snapshot) => {
             if(document.getElementById('list-komunikaty')) {
@@ -373,43 +380,70 @@
             }
             window.currentLiveMessages = [];
 
+            // Pobieramy ID zapisane w telefonie
+            const readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
+
             snapshot.forEach((docSnap) => {
                 const msg = docSnap.data();
                 msg.id = docSnap.id;
                 window.currentLiveMessages.push(msg);
+                const isRead = readMsgs.includes(msg.id);
 
                 const listContainer = document.getElementById(`list-${msg.category}`);
                 if (listContainer) {
                     const card = document.createElement('div');
-                    // Większe marginesy, większe cienie i zaokrąglenia dla łatwiejszego klikania
-                    card.className = "bg-white p-5 rounded-2xl shadow-md border-l-[6px] border-blue-500 cursor-pointer active:scale-[0.98] transition-transform relative overflow-hidden";
+                    card.id = `card-${msg.id}`;
+                    
+                    // Kolory zmieniają się w zależności od statusu przeczytania
+                    const bgClass = isRead ? 'bg-white border-gray-300 text-gray-500' : 'bg-blue-50/50 border-blue-500 text-gray-900';
+                    card.className = `p-5 rounded-2xl shadow-md border-l-[6px] cursor-pointer active:scale-[0.98] transition-all relative overflow-visible ${bgClass}`;
                     card.onclick = () => window.openLiveModal(msg.id); 
                     
+                    // Odznaka NOWE dla nieprzeczytanych
+                    const unreadBadge = isRead ? '' : `<span id="badge-${msg.id}" class="absolute -top-3 -right-2 bg-red-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full shadow-md animate-pulse z-10">NOWE</span>`;
+
                     card.innerHTML = `
+                        ${unreadBadge}
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-gray-900 text-lg leading-tight pr-6">${msg.title}</h3>
-                            <div class="absolute right-4 top-5 bg-blue-50 p-2 rounded-full text-blue-500">
+                            <h3 class="font-bold text-lg leading-tight pr-6">${msg.title}</h3>
+                            <div class="absolute right-4 top-5 bg-white shadow-sm p-2 rounded-full text-blue-500 opacity-80">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
                             </div>
                         </div>
                         <p class="text-base text-gray-600 mb-4 line-clamp-2">${msg.preview}</p>
-                        <span class="text-xs font-bold text-gray-500 uppercase bg-gray-100 px-3 py-1.5 rounded-lg tracking-wider">${msg.date}</span>
+                        <span class="text-xs font-bold text-gray-500 uppercase bg-white px-3 py-1.5 rounded-lg border border-gray-200 tracking-wider shadow-sm">${msg.date}</span>
                     `;
                     listContainer.appendChild(card);
                 }
             });
         });
 
-        // OBSŁUGA POWIĘKSZONEGO MODALU Z ZAŁĄCZNIKAMI
+        // OBSŁUGA MODALU + ZAPISYWANIE ODCZYTU W TELEFONIE
         window.openLiveModal = function(id) {
             const msg = window.currentLiveMessages.find(m => m.id === id);
             if(!msg) return;
             
+            // Logika zapamiętywania przeczytanej wiadomości
+            let readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
+            if (!readMsgs.includes(id)) {
+                readMsgs.push(id);
+                localStorage.setItem('readMsgs', JSON.stringify(readMsgs));
+                
+                // Wizualne "zgaszenie" kart na liście w tle
+                const badge = document.getElementById(`badge-${id}`);
+                if (badge) badge.remove();
+                
+                const cardElem = document.getElementById(`card-${id}`);
+                if (cardElem) {
+                    cardElem.classList.remove('bg-blue-50/50', 'border-blue-500', 'text-gray-900');
+                    cardElem.classList.add('bg-white', 'border-gray-300', 'text-gray-500');
+                }
+            }
+
             document.getElementById('modal-title').innerText = msg.title;
             document.getElementById('modal-date').innerText = msg.date;
             document.getElementById('modal-body').innerText = msg.body;
             
-            // Obsługa załączników (jeśli zostaną kiedykolwiek dodane w bazie)
             const attContainer = document.getElementById('modal-attachments');
             const attList = document.getElementById('attachments-list');
             attList.innerHTML = ''; 

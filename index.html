@@ -143,21 +143,35 @@
         }
 
         // Baza demonstracyjna
-        const dbMessages = [
-            { id: 1, category: "komunikaty", title: "Fuzja Centralbud i Instalbud", date: "29 Maj 2026", preview: "Aktualizacja statusu integracji prawnej.", body: "Proces przejęcia wchodzi w decydującą fazę.", image: "", attachments: [] },
-            { id: 2, category: "promocje", title: "Nowe warunki B2B", date: "28 Maj 2026", preview: "Zaktualizowane marże na asortyment.", body: "Od przyszłego miesiąca wchodzą w życie nowe rabaty.", image: "", attachments: [{ name: "cennik.xlsx", url: "#" }] },
-            { id: 3, category: "iteam", title: "Aktualizacja makr VBA", date: "25 Maj 2026", preview: "Wdrożono nowe skrypty.", body: "Dział IT przygotował narzędzia w Excelu.", image: "", attachments: [] },
-            { id: 4, category: "szkolenia", title: "Szkolenie produktowe", date: "20 Maj 2026", preview: "Zapisy na czerwcowe warsztaty.", body: "Obowiązkowe szkolenie omawiające najnowsze technologie.", image: "", attachments: [] }
-        ];
+      // Globalna zmienna do obsługi okienek modalnych (musi być dostępna dla funkcji z HTML-a)
+        window.currentLiveMessages = [];
 
-        // Renderowanie list
-        function renderMessages() {
-            dbMessages.forEach(msg => {
+        // --- POBIERANIE WIADOMOŚCI Z BAZY NA ŻYWO ---
+        // (Musisz upewnić się, że masz zaimportowane onSnapshot u góry w <script type="module">)
+        import { onSnapshot, collection as fsCollection, query as fsQuery, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Pobieramy wiadomości z kolekcji "messages" sortując od najnowszej
+        const messagesQuery = fsQuery(fsCollection(db, "messages"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(messagesQuery, (snapshot) => {
+            // Czyścimy widoki wszystkich 4 zakładek, zanim wrzucimy zaktualizowane dane
+            document.getElementById('list-komunikaty').innerHTML = '';
+            document.getElementById('list-promocje').innerHTML = '';
+            document.getElementById('list-iteam').innerHTML = '';
+            document.getElementById('list-szkolenia').innerHTML = '';
+            window.currentLiveMessages = []; // Resetujemy tablicę pomocniczą
+
+            snapshot.forEach((docSnap) => {
+                const msg = docSnap.data();
+                msg.id = docSnap.id; // Dodajemy prawdziwe ID z bazy
+                window.currentLiveMessages.push(msg); // Zapisujemy do modalu
+
                 const listContainer = document.getElementById(`list-${msg.category}`);
                 if (listContainer) {
                     const card = document.createElement('div');
                     card.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-500 cursor-pointer active:bg-gray-50 transition";
-                    card.onclick = () => window.openModal(msg.id);
+                    // Używamy docSnap.id jako unikalnego identyfikatora do otwarcia szczegółów
+                    card.onclick = () => window.openLiveModal(msg.id); 
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-1">
                             <h3 class="font-bold text-gray-800 text-sm">${msg.title}</h3>
@@ -168,6 +182,23 @@
                     listContainer.appendChild(card);
                 }
             });
+        });
+
+        // Nowa funkcja do obsługi okienka modalnego dla danych z bazy
+        window.openLiveModal = function(id) {
+            const msg = window.currentLiveMessages.find(m => m.id === id);
+            if(!msg) return;
+
+            document.getElementById('modal-title').innerText = msg.title;
+            document.getElementById('modal-date').innerText = msg.date;
+            document.getElementById('modal-body').innerText = msg.body;
+
+            // Ukrywamy obrazki i załączniki (na ten moment zrobiliśmy je opcjonalnie)
+            document.getElementById('modal-image').classList.add('hidden');
+            document.getElementById('modal-attachments').classList.add('hidden');
+
+            document.getElementById('message-modal').classList.remove('hidden');
+            document.getElementById('message-modal').classList.add('flex');
         }
 
         // Obsługa modalu
@@ -234,14 +265,22 @@
         let verifiedUserId = null; 
 
         // 1. Sprawdzanie czy użytkownik był już zalogowany (Pamięć lokalna)
+      // 1. Sprawdzanie czy użytkownik był już zalogowany lub oczekuje na PIN
         function checkAuthStatus() {
             const storedEmail = localStorage.getItem('userEmail');
             const storedCompanyName = localStorage.getItem('companyName');
+            const tempEmail = localStorage.getItem('tempEmail'); // Sprawdzamy, czy czeka na PIN
             
             if(storedEmail && storedCompanyName) {
+                // Pełny dostęp - pokazujemy aplikację
                 document.getElementById('screen-onboarding').classList.add('hidden');
                 document.getElementById('screen-app').classList.remove('hidden');
                 document.getElementById('user-company-name').innerText = storedCompanyName;
+            } else if (tempEmail) {
+                // Złożył wniosek, ale nie wpisał jeszcze PIN-u - pokazujemy ekran weryfikacji
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('step-pin').classList.remove('hidden');
+                document.getElementById('step-pin').classList.add('flex');
             }
         }
         checkAuthStatus();
@@ -281,65 +320,46 @@
 
        // 3. Krok B: Weryfikacja przesłanego wniosku po E-mailu i PIN-ie
 document.getElementById('btn-verify-pin').addEventListener('click', async () => {
-    // Używamy trim(), aby usunąć ewentualne niewidoczne spacje na końcu
-    const pinEntered = document.getElementById('pin-input').value.trim();
-    const email = localStorage.getItem('tempEmail');
-    const status = document.getElementById('pin-status');
-    
-    // Zabezpieczenie: czy telefon w ogóle pamięta e-mail z poprzedniego kroku?
-    if (!email) {
-        alert("BŁĄD LOKALNY: Twój telefon zapomniał adresu e-mail (odświeżyłeś stronę?). Wypełnij wniosek jeszcze raz.");
-        return;
-    }
-
-    if(pinEntered.length !== 6) { status.innerText = "Wprowadź 6-cyfrowy kod."; return; }
-    status.innerText = "Weryfikacja...";
-
-    try {
-        const q = query(collection(db, "users"), where("email", "==", email));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-            alert("BŁĄD ZAPYTANIA:\nSzukałem w bazie e-maila: " + email + "\nAle baza mówi, że nie ma takiego dokumentu!");
-            status.innerText = "Nie znaleziono wniosku w bazie.";
-            return;
-        }
-
-        let userDoc = null;
-        let userData = null;
-        querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
-
-        // === GŁÓWNE OKNO DIAGNOSTYCZNE ===
-        alert(
-            "WYNIKI Z BAZY FIREBASE:\n\n" +
-            "1. E-mail w bazie: '" + userData.email + "'\n" +
-            "2. Status w bazie: '" + userData.status + "'\n" +
-            "3. PIN w bazie: '" + userData.pin + "' (Typ danych: " + typeof userData.pin + ")\n\n" +
-            "TO CO WPISAŁEŚ:\n" +
-            "Wpisany PIN: '" + pinEntered + "'"
-        );
-
-        // Sprawdzamy zgodność i status
-        if(userData.pin === pinEntered && userData.status === 'approved') {
-            localStorage.setItem('userEmail', userData.email);
-            localStorage.setItem('companyName', userData.companyName);
-            verifiedUserId = userDoc.id; 
-
-            document.getElementById('screen-onboarding').classList.add('hidden');
-            document.getElementById('screen-app').classList.remove('hidden');
-            document.getElementById('user-company-name').innerText = userData.companyName;
+            const pinEntered = document.getElementById('pin-input').value.trim();
+            const email = localStorage.getItem('tempEmail');
+            const status = document.getElementById('pin-status');
             
-            alert("SUKCES! Autoryzacja poprawna.");
-        } else {
-            status.innerText = "Nieprawidłowy PIN lub wniosek niezaakceptowany.";
-        }
-    } catch (error) {
-        console.error(error);
-        alert("BŁĄD KRYTYCZNY: " + error.message);
-        status.innerText = "Błąd połączenia. Spróbuj ponownie.";
-    }
-});
+            if (!email) { status.innerText = "Brak danych sesji. Wypełnij wniosek ponownie."; return; }
+            if(pinEntered.length !== 6) { status.innerText = "Wprowadź 6-cyfrowy kod."; return; }
+            status.innerText = "Weryfikacja...";
 
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
+                
+                // JEŚLI ADMIN USUNĄŁ WNIOSEK Z BAZY:
+                if (querySnapshot.empty) {
+                    alert("Twój wniosek został odrzucony lub usunięty przez administratora.");
+                    localStorage.removeItem('tempEmail'); // Czyścimy pamięć
+                    location.reload(); // Przeładowujemy stronę - wraca formularz
+                    return;
+                }
+
+                let userDoc = null;
+                let userData = null;
+                querySnapshot.forEach((doc) => { userDoc = doc; userData = doc.data(); });
+
+                if(userData.pin === pinEntered && userData.status === 'approved') {
+                    localStorage.setItem('userEmail', userData.email);
+                    localStorage.setItem('companyName', userData.companyName);
+                    verifiedUserId = userDoc.id; 
+
+                    document.getElementById('screen-onboarding').classList.add('hidden');
+                    document.getElementById('screen-app').classList.remove('hidden');
+                    document.getElementById('user-company-name').innerText = userData.companyName;
+                } else {
+                    status.innerText = "Nieprawidłowy PIN lub wniosek czeka na akceptację.";
+                }
+            } catch (error) {
+                console.error(error);
+                status.innerText = "Błąd połączenia. Spróbuj ponownie.";
+            }
+        });
         // 4. Pobieranie Tokenu Push i przypisywanie do Użytkownika
         document.getElementById('btn-allow').addEventListener('click', async () => {
             const btnAllow = document.getElementById('btn-allow');

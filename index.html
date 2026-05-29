@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Użytkownik</title>
+    <!-- Manifest dla PWA (możesz dodać plik manifest.json) -->
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-6 rounded-2xl shadow-md w-full max-w-sm text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Aplikacja PWA</h1>
+        <p class="text-gray-600 mb-6">Wersja testowa dla Zarządu</p>
+        
+        <button id="btn-allow" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition cursor-pointer">
+            Włącz Powiadomienia Push
+        </button>
+        
+        <p id="status" class="mt-4 text-sm text-gray-500">Oczekiwanie na zgodę...</p>
+    </div>
+
+    <!-- Moduły Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+
+        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ Z FIREBASE
+        const firebaseConfig = {
+  apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
+  authDomain: "aplikacja-608f2.firebaseapp.com",
+  projectId: "aplikacja-608f2",
+  storageBucket: "aplikacja-608f2.firebasestorage.app",
+  messagingSenderId: "1004154231748",
+  appId: "1:1004154231748:web:a5a279ad1187367d9ba291",
+  measurementId: "G-DTRX50TEDL"
+
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const messaging = getMessaging(app);
+
+        const btnAllow = document.getElementById('btn-allow');
+        const statusText = document.getElementById('status');
+
+        btnAllow.addEventListener('click', async () => {
+            try {
+                statusText.innerText = "Prośba o uprawnienia...";
+                // Rejestracja ukrytego skryptu tła (Service Workera)
+                const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+                
+                // Pobranie unikalnego tokenu urządzenia (Wklej tu swój wygenerowany klucz VAPID)
+                const token = await getToken(messaging, { 
+                    vapidKey: 'TWÓJ_KLUCZ_VAPID_Z_USTAWIEN_FIREBASE',
+                    serviceWorkerRegistration: registration 
+                });
+
+                if (token) {
+                    statusText.innerText = "Uzyskano token! Zapisuję w bazie...";
+                    
+                    // Zapisujemy token w bazie danych Firestore
+                    await addDoc(collection(db, "device_tokens"), {
+                        token: token,
+                        device: navigator.userAgent,
+                        createdAt: new Date()
+                    });
+
+                    statusText.innerText = "Połączono! Możesz teraz odebrać komunikat.";
+                    statusText.className = "mt-4 text-sm text-green-600 font-medium";
+                    btnAllow.disabled = true;
+                    btnAllow.className = "w-full bg-gray-400 text-white font-semibold py-3 px-4 rounded-xl cursor-not-allowed";
+                } else {
+                    statusText.innerText = "Nie udało się pobrać tokenu.";
+                }
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Błąd: " + error.message;
+                statusText.className = "mt-4 text-sm text-red-600";
+            }
+        });
+    </script>
+</body>
+</html>

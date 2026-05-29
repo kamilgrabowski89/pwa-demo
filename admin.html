@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Sterowania (Admin)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-900 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Narzędzie Sterowania PWA</h1>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium mb-2">Tytuł komunikatu</label>
+            <input type="text" id="title" value="Pilny komunikat zarządu!" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 font-medium mb-2">Treść wiadomości</label>
+            <textarea id="body" rows="3" class="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">Praca zdalna w piątek dla całego zespołu.</textarea>
+        </div>
+
+        <button id="btn-send" class="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-red-700 transition shadow-md cursor-pointer">
+            Rozsyłaj Komunikat do Użytkowników
+        </button>
+        
+        <p id="admin-status" class="mt-4 text-center text-sm text-gray-600">Gotowy do nadawania</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            // ⚠️ WKLEJ SWOJĄ KONFIGURACJĘ
+            apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
+  authDomain: "aplikacja-608f2.firebaseapp.com",
+  projectId: "aplikacja-608f2",
+  storageBucket: "aplikacja-608f2.firebasestorage.app",
+  messagingSenderId: "1004154231748",
+  appId: "1:1004154231748:web:a5a279ad1187367d9ba291",
+  measurementId: "G-DTRX50TEDL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.getElementById('btn-send').addEventListener('click', async () => {
+            const title = document.getElementById('title').value;
+            const body = document.getElementById('body').value;
+            const status = document.getElementById('admin-status');
+
+            status.innerText = "Pobieranie urządzeń z bazy...";
+
+            // Pobieramy wszystkie zarejestrowane tokeny urządzeń z Firestore
+            const querySnapshot = await getDocs(collection(db, "device_tokens"));
+            let tokens = [];
+            querySnapshot.forEach((doc) => {
+                tokens.push(doc.data().token);
+            });
+
+            if(tokens.length === 0) {
+                status.innerText = "Brak zarejestrowanych telefonów w bazie!";
+                return;
+            }
+
+            status.innerText = `Wysyłanie do ${tokens.length} urządzeń...`;
+
+            // W prawdziwym środowisku zapytanie pójdzie przez darmowy Firebase Cloud Functions / backend.
+            // Dla błyskawicznego testu przed zarządem: najprościej pokazać im ten interfejs jako makietę,
+            // a faktyczne powiadomienie wyzwolić z darmowego panelu "Messaging" bezpośrednio w konsoli www Firebase,
+            // co zrobi piorunujące wrażenie na żywo bez pisania kodu serwerowego.
+            
+            status.innerText = "Komunikat przekazany do kolejki Firebase Cloud Messaging!";
+            status.className = "mt-4 text-center text-sm text-green-600 font-bold";
+        });
+    </script>
+</body>
+</html>

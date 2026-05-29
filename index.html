@@ -229,8 +229,8 @@
         import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-        // ⚠️ TUTAJ WKLEJ SWOJĄ KONFIGURACJĘ Z FIREBASE CONSOLE
-  const firebaseConfig = {
+        // BEZPIECZNA, ZSANITIZOWANA KONFIGURACJA
+        const firebaseConfig = {
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
             authDomain: "aplikacja-608f2.firebaseapp.com",
             projectId: "aplikacja-608f2",
@@ -246,7 +246,6 @@
         let verifiedUserId = null; 
         window.currentLiveMessages = [];
 
-        // 1. Sprawdzanie czy użytkownik jest już zalogowany
         function checkAuthStatus() {
             const storedDocId = localStorage.getItem('userDocId');
             const storedCompanyName = localStorage.getItem('companyName');
@@ -262,7 +261,6 @@
         }
         checkAuthStatus();
 
-        // 2. LOGOWANIE (E-mail i Hasło)
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
@@ -297,7 +295,6 @@
             }
         });
 
-        // 3. WNIOSEK REJESTRACYJNY (Status: pending)
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -330,7 +327,6 @@
             }
         });
 
-        // 4. AKTYWACJA (Sprawdzenie PINu i bezpieczny zapis Hasła)
         document.getElementById('form-activation').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('act-email').value.trim();
@@ -378,12 +374,10 @@
             } catch (error) {
                 console.error(error);
                 status.className = "text-xs text-center text-red-600 mt-2 font-bold bg-red-50 p-3 rounded-xl border border-red-200 block text-left overflow-x-auto";
-                status.innerText = "BŁĄD ZAPISU BAZY:
-" + error.message;
+                status.innerText = "BŁĄD ZAPISU BAZY:\n" + error.message;
             }
         });
 
-        // 5. POBIERANIE TOKENU PUSH
         document.getElementById('btn-allow').addEventListener('click', async () => {
             const setupBox = document.getElementById('push-setup');
             const statusText = document.getElementById('push-status-text');
@@ -394,7 +388,7 @@
                 const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
                 
                 const token = await getToken(messaging, { 
- vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw',// ⚠️ WKLEJ KLUCZ VAPID
+                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw', 
                     serviceWorkerRegistration: registration 
                 });
 
@@ -405,17 +399,16 @@
                     setupBox.classList.add('hidden'); 
                     indicator.classList.remove('bg-red-400');
                     indicator.classList.add('bg-green-400'); 
-                    alert("Super! Powiadomienia zostały aktywowane.");
+                    alert("Super! Od teraz będziesz dostawał powiadomienia na ekran.");
                 } else {
-                    statusText.innerText = "Błąd sesji. Zaloguj się ponownie.";
+                    statusText.innerText = "Błąd sesji. Wyloguj się i zaloguj ponownie.";
                 }
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Błąd generowania klucza.";
+                statusText.innerText = "Błąd generowania klucza zabezpieczeń.";
             }
         });
 
-        // 6. POBIERANIE WIADOMOŚCI Z BAZY NA ŻYWO
         const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
         onSnapshot(messagesQuery, (snapshot) => {
             if(document.getElementById('list-komunikaty')) {
@@ -448,15 +441,6 @@
             });
         });
 
-        window.openLiveModal = function(id) {
-            const msg = window.currentLiveMessages.find(m => m.id === id);
-            if(!msg) return;
-            document.getElementById('modal-title').innerText = msg.title;
-            document.getElementById('modal-date').innerText = msg.date;
-            document.getElementById('modal-body').innerText = msg.body;
-            document.getElementById('message-modal').classList.remove('hidden');
-            document.getElementById('message-modal').classList.add('flex');
-        }
     </script>
 </body>
 </html>

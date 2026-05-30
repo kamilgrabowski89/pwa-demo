@@ -10,6 +10,7 @@
 <body class="bg-slate-50 font-sans p-6 min-h-screen">
 
     <div class="max-w-6xl mx-auto space-y-8">
+        <!-- NAGŁÓWEK -->
         <header class="bg-blue-900 text-white p-6 rounded-[2rem] shadow-xl flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-4">
                 <div class="bg-white p-3 rounded-2xl shadow-inner text-red-600">
@@ -17,13 +18,47 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black uppercase tracking-tighter">Instalbud B2B <span class="text-red-500">Admin</span></h1>
-                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią i autoryzacją</p>
+                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią i konfiguracja</p>
                 </div>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- ZARZĄDZANIE NAZWAMI ZAKŁADEK -->
+        <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
+            <div class="flex items-center space-x-3 mb-6">
+                <i class="fa-solid fa-sliders text-2xl text-red-600"></i>
+                <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Konfiguracja Zakładek (Nazwy w aplikacji)</h2>
+            </div>
             
+            <form id="form-settings" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-slate-500 uppercase">Zakładka 1 (Info)</label>
+                    <input type="text" id="tab1-name" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-slate-500 uppercase">Zakładka 2 (Okazje)</label>
+                    <input type="text" id="tab2-name" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-slate-500 uppercase">Zakładka 3 (iTeam)</label>
+                    <input type="text" id="tab3-name" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1 text-slate-500 uppercase">Zakładka 4 (Szkolenia)</label>
+                    <input type="text" id="tab4-name" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
+                </div>
+                
+                <div class="md:col-span-4 mt-2">
+                    <button type="submit" class="w-full bg-blue-900 text-white font-black py-4 rounded-xl shadow-lg hover:bg-blue-800 cursor-pointer uppercase tracking-widest active:scale-95 transition-transform">
+                        Zapisz nazwy zakładek
+                    </button>
+                    <p id="settings-status" class="text-sm text-center text-green-600 font-bold hidden mt-4 bg-green-50 p-3 rounded-xl border border-green-200">Nazwy zostały zaktualizowane!</p>
+                </div>
+            </form>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- PUBLIKOWANIE KOMUNIKATÓW -->
             <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-paper-plane text-2xl text-red-600"></i>
@@ -34,10 +69,10 @@
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Wybierz zakładkę w aplikacji</label>
                         <select id="msg-category" class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
-                            <option value="komunikaty">INFO (Wiadomości, aktualności)</option>
-                            <option value="promocje">OKAZJE (Promocje, wyprzedaże, hity)</option>
-                            <option value="iteam">iTEAM (Systemy informatyczne)</option>
-                            <option value="szkolenia">NAUKA (Terminy szkoleń)</option>
+                            <option value="komunikaty">Zakładka 1 (Info / Wiadomości)</option>
+                            <option value="promocje">Zakładka 2 (Okazje / Promocje)</option>
+                            <option value="iteam">Zakładka 3 (iTeam)</option>
+                            <option value="szkolenia">Zakładka 4 (Szkolenia / Nauka)</option>
                         </select>
                     </div>
                     <div>
@@ -45,20 +80,21 @@
                         <input type="text" id="msg-title" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 text-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Krótki podgląd (Zajawka na liście)</label>
-                        <input type="text" id="msg-preview" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-medium text-slate-700" placeholder="np. Zmiana cennika pomp ciepła od poniedziałku...">
+                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Krótki podgląd</label>
+                        <input type="text" id="msg-preview" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-medium text-slate-700">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Pełna treść komunikatu</label>
                         <textarea id="msg-body" rows="6" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-medium text-slate-700"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-700 cursor-pointer uppercase tracking-widest active:scale-95 transition-transform">
+                    <button type="submit" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-700 cursor-pointer uppercase tracking-widest">
                         Zapisz i Opublikuj
                     </button>
                     <p id="msg-status" class="text-sm text-center text-green-600 font-bold hidden mt-4 bg-green-50 p-3 rounded-xl border border-green-200">Wiadomość została opublikowana!</p>
                 </form>
             </section>
 
+            <!-- ZARZĄDZANIE WNIOSKAMI -->
             <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-users text-2xl text-blue-900"></i>
@@ -72,9 +108,10 @@
         </div>
     </div>
 
+    <!-- LOGIKA FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
@@ -84,7 +121,46 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 1. OBSŁUGA WNIOSKÓW Z APLIKACJI
+        const settingsRef = doc(db, "settings", "ui_config");
+        
+        getDoc(settingsRef).then((docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if(data.tab1) document.getElementById('tab1-name').value = data.tab1;
+                if(data.tab2) document.getElementById('tab2-name').value = data.tab2;
+                if(data.tab3) document.getElementById('tab3-name').value = data.tab3;
+                if(data.tab4) document.getElementById('tab4-name').value = data.tab4;
+            } else {
+                document.getElementById('tab1-name').value = 'Info';
+                document.getElementById('tab2-name').value = 'Okazje';
+                document.getElementById('tab3-name').value = 'iTeam';
+                document.getElementById('tab4-name').value = 'Szkolenia';
+            }
+        });
+
+        document.getElementById('form-settings').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const status = document.getElementById('settings-status');
+            btn.disabled = true;
+
+            const newSettings = {
+                tab1: document.getElementById('tab1-name').value,
+                tab2: document.getElementById('tab2-name').value,
+                tab3: document.getElementById('tab3-name').value,
+                tab4: document.getElementById('tab4-name').value
+            };
+
+            try {
+                await setDoc(settingsRef, newSettings, { merge: true });
+                status.classList.remove('hidden');
+                setTimeout(() => { status.classList.add('hidden'); btn.disabled = false; }, 3000);
+            } catch (error) {
+                alert("Błąd zapisu ustawień.");
+                btn.disabled = false;
+            }
+        });
+
         const pendingList = document.getElementById('pending-users-list');
         const q = query(collection(db, "users"), where("status", "==", "pending"));
         
@@ -95,7 +171,6 @@
                     <div class="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-2xl text-center">
                         <i class="fa-solid fa-check-circle text-4xl text-slate-300 mb-3"></i>
                         <p class="text-slate-500 font-bold uppercase tracking-wider text-sm">Brak nowych wniosków</p>
-                        <p class="text-xs text-slate-400 mt-1">Wszyscy klienci zostali obsłużeni.</p>
                     </div>`;
                 return;
             }
@@ -109,11 +184,11 @@
                         <strong class="text-blue-900 font-black text-lg leading-tight">${data.companyName}</strong>
                         <span class="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200">NIP: ${data.nip}</span>
                     </div>
-                    <p class="text-sm text-slate-600 font-medium"><i class="fa-solid fa-envelope mr-2 text-slate-400"></i> ${data.email}</p>
-                    <p class="text-sm text-slate-600 font-medium mb-2"><i class="fa-solid fa-phone mr-2 text-slate-400"></i> ${data.phone}</p>
+                    <p class="text-sm text-slate-600 font-medium">${data.email}</p>
+                    <p class="text-sm text-slate-600 font-medium mb-2">${data.phone}</p>
                     <div class="flex space-x-3 mt-4 pt-4 border-t-2 border-slate-200">
-                        <button onclick="approveUser('${userDoc.id}', '${data.email}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-green-700 cursor-pointer shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-check mr-2"></i>Akceptuj</button>
-                        <button onclick="rejectUser('${userDoc.id}')" class="flex-1 bg-white border-2 border-red-100 text-red-600 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-red-50 cursor-pointer active:scale-95 transition-transform"><i class="fa-solid fa-xmark mr-2"></i>Odrzuć</button>
+                        <button onclick="approveUser('${userDoc.id}', '${data.email}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-green-700 cursor-pointer shadow-md"><i class="fa-solid fa-check mr-2"></i>Akceptuj</button>
+                        <button onclick="rejectUser('${userDoc.id}')" class="flex-1 bg-white border-2 border-red-100 text-red-600 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-red-50 cursor-pointer"><i class="fa-solid fa-xmark mr-2"></i>Odrzuć</button>
                     </div>
                 `;
                 pendingList.appendChild(card);
@@ -124,7 +199,7 @@
             const pin = Math.floor(100000 + Math.random() * 900000).toString();
             await updateDoc(doc(db, "users", docId), { status: 'approved', pin: pin });
             const subject = encodeURIComponent("Dostęp do Instalbud B2B - Twój Kod PIN");
-            const body = encodeURIComponent(`Witaj,\n\nTwój wniosek do platformy Instalbud B2B został zaakceptowany!\n\nTwój jednorazowy kod PIN do aktywacji to: ${pin}\n\nWpisz go w aplikacji, aby ustanowić hasło i uzyskać dostęp do panelu.`);
+            const body = encodeURIComponent(`Witaj,\n\nTwój wniosek został zaakceptowany!\n\nPIN do aktywacji to: ${pin}`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
@@ -134,7 +209,6 @@
             }
         };
 
-        // 2. PUBLIKOWANIE NOWYCH KOMUNIKATÓW
         document.getElementById('form-new-message').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -157,8 +231,7 @@
                 e.target.reset(); 
                 setTimeout(() => { status.classList.add('hidden'); btn.disabled = false; }, 3000);
             } catch (error) {
-                console.error("Błąd dodawania wiadomości:", error);
-                alert("Wystąpił błąd podczas publikacji. Sprawdź połączenie.");
+                alert("Wystąpił błąd podczas publikacji.");
                 btn.disabled = false;
             }
         });

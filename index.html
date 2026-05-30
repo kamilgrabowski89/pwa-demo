@@ -22,6 +22,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans safe-width pb-32">
 
+    <!-- BANER INSTALACJI PWA -->
     <div id="install-banner" class="hidden fixed bottom-28 left-4 right-4 bg-slate-950 text-white p-5 rounded-2xl shadow-2xl z-[100] justify-between items-center border-2 border-red-600 mx-auto max-w-lg">
         <div class="flex-1 pr-4">
             <h3 class="font-bold text-base mb-1 text-red-500 uppercase">Zainstaluj Instalbud</h3>
@@ -30,6 +31,7 @@
         <button id="btn-install" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">INSTALUJ</button>
     </div>
 
+    <!-- EKRAN LOGOWANIA -->
     <div id="screen-login" class="flex flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <div class="flex justify-center mb-6 bg-blue-900 p-4 rounded-2xl">
@@ -49,6 +51,7 @@
         </div>
     </div>
 
+    <!-- EKRAN REJESTRACJI -->
     <div id="screen-register" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <h1 class="text-2xl font-black text-blue-900 mb-6 text-center uppercase tracking-tighter">Wniosek o dostęp</h1>
@@ -64,6 +67,7 @@
         </div>
     </div>
 
+    <!-- EKRAN AKTYWACJI -->
     <div id="screen-activation" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <h1 class="text-2xl font-black text-blue-900 mb-4 text-center uppercase tracking-tighter">Aktywacja Konta</h1>
@@ -78,6 +82,7 @@
         </div>
     </div>
 
+    <!-- GŁÓWNA APLIKACJA -->
     <div id="screen-app" class="hidden">
         <header class="bg-blue-900 text-white p-5 shadow-xl sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-2">
@@ -85,11 +90,9 @@
             </div>
             <div class="flex items-center space-x-3">
                 <div id="status-indicator" class="w-4 h-4 bg-red-400 rounded-full border-2 border-white animate-pulse"></div>
-                
                 <button onclick="openUserModal()" class="p-2.5 bg-blue-800 rounded-xl cursor-pointer text-white">
                     <i class="fa-solid fa-user text-lg"></i>
                 </button>
-                
                 <button onclick="logout()" class="p-2.5 bg-blue-800 rounded-xl cursor-pointer text-white"><i class="fa-solid fa-power-off text-lg"></i></button>
             </div>
         </header>
@@ -115,6 +118,7 @@
         </main>
     </div>
 
+    <!-- ZAPYTANIE OFERTOWE Z DYNAMICZNYM OPIEKUNEM Z BAZY -->
     <div id="screen-contact" class="hidden flex-col min-h-screen bg-slate-50 safe-width">
         <header class="bg-blue-900 text-white p-5 flex items-center space-x-4 border-b-4 border-red-600 relative z-50">
             <button onclick="showScreen('screen-app')" class="p-2 bg-blue-800 rounded-xl cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
@@ -122,11 +126,13 @@
         </header>
         <main class="p-4 max-w-2xl mx-auto space-y-4 relative z-40">
             <div class="bg-white p-6 rounded-2xl shadow-md text-center border-t-4 border-red-600">
-                <img src="https://ui-avatars.com/api/?name=Krzysztof+Handlowiec&background=1e3a8a&color=fff&size=128" class="w-24 h-24 rounded-2xl mx-auto mb-3 border shadow-sm">
-                <h2 class="text-xl font-black text-blue-900">Krzysztof Handlowiec</h2>
+                <!-- DYNAMICZNE ELEMENTY OPIEKUNA -->
+                <img id="manager-img" src="https://ui-avatars.com/api/?name=Biuro+Obslugi&background=1e3a8a&color=fff&size=128" class="w-24 h-24 rounded-2xl mx-auto mb-3 border shadow-sm object-cover">
+                <h2 id="manager-name" class="text-xl font-black text-blue-900">Biuro Obsługi Klienta</h2>
+                <p class="text-xs text-slate-400 font-bold uppercase mb-4">Twój Dedykowany Opiekun</p>
                 <div class="flex justify-center space-x-3 mt-4">
-                    <a href="tel:+48123456789" class="bg-green-500 text-white py-3 px-4 rounded-xl font-bold text-sm">Zadzwoń</a>
-                    <a href="mailto:krzysztof@instalbud.pl" class="bg-blue-600 text-white py-3 px-4 rounded-xl font-bold text-sm">E-mail</a>
+                    <a id="manager-phone-link" href="tel:+48123456789" class="bg-green-500 text-white py-3 px-4 rounded-xl font-bold text-sm">Zadzwoń</a>
+                    <a id="manager-email-link" href="mailto:biuro@instalbud.pl" class="bg-blue-600 text-white py-3 px-4 rounded-xl font-bold text-sm">E-mail</a>
                 </div>
             </div>
             <form id="form-inquiry" class="bg-white p-6 rounded-2xl shadow-md space-y-4">
@@ -150,6 +156,7 @@
         </main>
     </div>
 
+    <!-- MENU DOLNE -->
     <nav class="bg-white border-t-2 flex justify-around py-3 shadow-2xl px-2 pb-safe">
         <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-900 flex flex-col items-center flex-1 active-tab cursor-pointer">
             <i class="fa-solid fa-bullhorn text-2xl mb-0.5"></i>
@@ -175,6 +182,7 @@
         </button>
     </nav>
 
+    <!-- OKNO MODALNE (Wiadomości) -->
     <div id="message-modal" class="fixed inset-0 bg-slate-900/60 z-[10000] hidden items-center justify-center p-4 screen-transition">
         <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[80vh] relative border-t-8 border-blue-900 flex flex-col">
             <div class="flex justify-between items-center mb-5">
@@ -183,27 +191,23 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-            
             <img id="modal-image" src="" alt="Obraz wiadomości" class="hidden w-full h-auto rounded-xl mb-4 shadow border border-slate-100">
-            
             <h2 id="modal-title" class="text-xl font-black text-blue-900 mb-3 uppercase tracking-tight"></h2>
             <p id="modal-body" class="text-slate-700 text-base leading-relaxed whitespace-pre-line font-medium mb-4"></p>
         </div>
     </div>
 
+    <!-- MODAL DANYCH KONTA (IKONA LUDZIKA) -->
     <div id="user-modal" class="fixed inset-0 bg-slate-900/60 z-[10000] hidden items-center justify-center p-4 screen-transition">
         <div class="bg-white w-full max-w-sm rounded-3xl p-7 shadow-2xl relative border-t-8 border-red-600 flex flex-col items-center">
             <button onclick="closeUserModal()" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-blue-900 active:bg-red-100 cursor-pointer">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
-            
             <div class="w-28 h-28 rounded-full bg-slate-100 border-4 border-white shadow-md flex items-center justify-center text-red-600 mb-5 mt-2">
                 <i class="fa-solid fa-user text-6xl"></i>
             </div>
-            
             <h2 class="text-2xl font-black text-blue-900 mb-1 uppercase tracking-tighter">Twoje Konto B2B</h2>
             <p id="user-company" class="text-base text-slate-500 font-bold mb-6 text-center"></p>
-            
             <div class="w-full space-y-3.5 text-sm">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">E-mail</label>
@@ -221,7 +225,6 @@
                     <span id="user-status-tag" class="px-3 py-1.5 rounded-full font-black uppercase text-[10px] tracking-wider"></span>
                 </div>
             </div>
-            
             <button onclick="logout()" class="w-full mt-7 bg-blue-900 text-white font-black py-4 rounded-xl shadow-lg active:scale-95 transition-transform cursor-pointer uppercase tracking-wider">
                 Wyloguj się
             </button>
@@ -230,7 +233,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -238,7 +241,7 @@
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
             authDomain: "aplikacja-608f2.firebaseapp.com",
             projectId: "aplikacja-608f2",
-            storageBucket: "aplikacja-608f2.firebasestorage.app", // Wymagane dla uploadu obrazów
+            storageBucket: "aplikacja-608f2.firebasestorage.app", 
             messagingSenderId: "1004154231748",
             appId: "1:1004154231748:web:a5a279ad1187367d9ba291"
         };
@@ -250,10 +253,9 @@
 
         let verifiedUserId = null;
         let allMessagesData = [];
-        let limitDays = 30; // Wyświetla wiadomości z 30 dni by nie zawalać UI
-        let currentMessagesCount = 0;
+        let limitDays = 30; 
 
-        // DYNAMICZNE NAZWY ZAKŁADEK
+        // NASŁUCHIWANIE NAZW ZAKŁADEK
         onSnapshot(doc(db, "settings", "ui_config"), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
@@ -264,7 +266,7 @@
             }
         });
 
-        // NAWIGACJA ZAKŁADEK
+        // NAWIGACJA
         window.switchTab = function(moduleId, btn) {
             if (typeof closeModal === "function") closeModal();
             if (typeof closeUserModal === "function") closeUserModal();
@@ -283,10 +285,7 @@
         }
 
         window.showScreen = function(screenId) {
-            if(screenId !== 'screen-app') {
-                if(typeof closeUserModal === "function") closeUserModal();
-            }
-
+            if(screenId !== 'screen-app') { if(typeof closeUserModal === "function") closeUserModal(); }
             document.getElementById('screen-login').classList.add('hidden');
             document.getElementById('screen-app').classList.add('hidden');
             document.getElementById('screen-contact').classList.add('hidden');
@@ -299,12 +298,11 @@
             
             const nav = document.querySelector('nav');
             if(screenId === 'screen-app' || screenId === 'screen-contact') nav.classList.remove('hidden');
-            else nav.classList.add('hidden');
-
+            else nav.nav.classList.add('hidden');
             window.scrollTo(0,0);
         }
 
-        // --- ZARZĄDZANIE WIADOMOŚCIAMI (LIMIT 30 DNI) ---
+        // WIADOMOŚCI 30 DNI
         function renderMessagesList() {
             document.querySelectorAll('.app-module').forEach(el => el.innerHTML = '');
             const readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
@@ -317,10 +315,7 @@
                 const diffTime = Math.abs(now - msgDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 
-                if (diffDays > limitDays) {
-                    hasOlder = true;
-                    return;
-                }
+                if (diffDays > limitDays) { hasOlder = true; return; }
 
                 const isRead = readMsgs.includes(msg.id);
                 const card = document.createElement('div');
@@ -337,84 +332,49 @@
                 if(container) container.appendChild(card);
             });
 
-            if(hasOlder) { olderBtnContainer.classList.remove('hidden'); } 
-            else { olderBtnContainer.classList.add('hidden'); }
+            if(hasOlder) { olderBtnContainer.classList.remove('hidden'); } else { olderBtnContainer.classList.add('hidden'); }
         }
 
-        window.showOlderMessages = function() {
-            limitDays = 9999; // Zdejmij limit 30 dni
-            renderMessagesList();
-        }
+        window.showOlderMessages = function() { limitDays = 9999; renderMessagesList(); }
 
-        // SYNC WIADOMOŚCI Z BAZY
         onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
             allMessagesData = [];
-            snapshot.forEach((docSnap) => {
-                const msg = docSnap.data(); 
-                msg.id = docSnap.id;
-                allMessagesData.push(msg);
-            });
-            limitDays = 30; // Resetuj filtr
-            renderMessagesList();
+            snapshot.forEach((docSnap) => { const msg = docSnap.data(); msg.id = docSnap.id; allMessagesData.push(msg); });
+            limitDays = 30; renderMessagesList();
         });
 
-        // MODAL SZCZEGÓŁÓW WIADOMOŚCI (Z GRAFIKĄ)
         window.openModal = function(msg) {
             let readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
             if (!readMsgs.includes(msg.id)) {
-                readMsgs.push(msg.id);
-                localStorage.setItem('readMsgs', JSON.stringify(readMsgs));
-                
+                readMsgs.push(msg.id); localStorage.setItem('readMsgs', JSON.stringify(readMsgs));
                 const cardElem = document.getElementById(`card-${msg.id}`);
-                if (cardElem) {
-                    cardElem.classList.remove('border-blue-900', 'unread-glow');
-                    cardElem.classList.add('border-slate-200', 'opacity-75');
-                }
+                if (cardElem) { cardElem.classList.remove('border-blue-900', 'unread-glow'); cardElem.classList.add('border-slate-200', 'opacity-75'); }
             }
             document.getElementById('modal-title').innerText = msg.title;
             document.getElementById('modal-date').innerText = msg.date;
             document.getElementById('modal-body').innerText = msg.body;
-            
             const modalImg = document.getElementById('modal-image');
-            if (msg.imageUrl) {
-                modalImg.src = msg.imageUrl;
-                modalImg.classList.remove('hidden');
-            } else {
-                modalImg.src = "";
-                modalImg.classList.add('hidden');
-            }
-
+            if (msg.imageUrl) { modalImg.src = msg.imageUrl; modalImg.classList.remove('hidden'); } else { modalImg.src = ""; modalImg.classList.add('hidden'); }
             const modal = document.getElementById('message-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
         }
 
-        window.closeModal = () => {
-            document.getElementById('message-modal').classList.add('hidden');
-            document.getElementById('message-modal').classList.remove('flex');
-        };
+        window.closeModal = () => { document.getElementById('message-modal').classList.add('hidden'); document.getElementById('message-modal').classList.remove('flex'); };
 
-        // --- ZAPYTANIA Z ZAŁĄCZNIKIEM < 5MB ---
+        // ZAŁĄCZNIKI
         const fileInput = document.getElementById('inq-file');
         const fileNameSpan = document.getElementById('file-name');
         const fileErrorSpan = document.getElementById('file-error');
 
         fileInput.addEventListener('change', () => {
-            const file = fileInput.files[0];
-            fileErrorSpan.classList.add('hidden');
-            
+            const file = fileInput.files[0]; fileErrorSpan.classList.add('hidden');
             if (file) {
                 if (file.size > 5 * 1024 * 1024) { 
-                    fileErrorSpan.innerText = "BŁĄD: Plik jest za duży (max 5MB).";
-                    fileErrorSpan.classList.remove('hidden');
-                    fileInput.value = ""; 
-                    fileNameSpan.innerText = "Nie wybrano pliku...";
-                    return;
+                    fileErrorSpan.innerText = "BŁĄD: Plik jest za duży (max 5MB)."; fileErrorSpan.classList.remove('hidden');
+                    fileInput.value = ""; fileNameSpan.innerText = "Nie wybrano pliku..."; return;
                 }
                 fileNameSpan.innerText = file.name;
-            } else {
-                fileNameSpan.innerText = "Nie wybrano pliku...";
-            }
+            } else { fileNameSpan.innerText = "Nie wybrano pliku..."; }
         });
 
         document.getElementById('form-inquiry').addEventListener('submit', async (e) => {
@@ -422,21 +382,16 @@
             const status = document.getElementById('inq-status');
             const btn = document.getElementById('btn-inquiry-send');
             const file = fileInput.files[0];
-            
             btn.disabled = true; status.className = "text-center text-sm font-bold text-blue-900 mt-2 animate-pulse";
-            status.innerText = "Trwa wysyłanie (to może chwilę potrwać)...";
-            
+            status.innerText = "Trwa wysyłanie...";
             let uploadedFileUrl = "";
 
             try {
                 if (file) {
-                    status.innerText = "Trwa upload załącznika...";
                     const storageRef = ref(storage, `inquiries/${verifiedUserId || 'guest'}/${Date.now()}_${file.name}`);
                     const uploadSnap = await uploadBytes(storageRef, file);
                     uploadedFileUrl = await getDownloadURL(uploadSnap.ref);
                 }
-
-                status.innerText = "Trwa zapisywanie zapytania...";
                 await addDoc(collection(db, "inquiries"), {
                     userId: verifiedUserId || "guest",
                     companyName: localStorage.getItem('companyName') || "Niezalogowany",
@@ -445,125 +400,90 @@
                     status: "new",
                     createdAt: new Date()
                 });
-
                 status.className = "text-center text-sm font-bold text-green-600 mt-2 bg-green-50 p-3 rounded-xl";
-                status.innerText = "Dziękujemy! Zapytanie zostało wysłane.";
-                e.target.reset();
-                fileNameSpan.innerText = "Nie wybrano pliku...";
-                setTimeout(() => { btn.disabled = false; status.innerText = ""; status.className = "text-center text-sm font-bold mt-2"; }, 4000);
-            
-            } catch (error) {
-                console.error(error);
-                status.className = "text-center text-sm font-bold text-red-600 mt-2 bg-red-50 p-3 rounded-xl";
-                status.innerText = "Błąd podczas wysyłania zapytania.";
-                btn.disabled = false;
-            }
+                status.innerText = "Zapytanie zostało pomyślnie wysłane.";
+                e.target.reset(); fileNameSpan.innerText = "Nie wybrano pliku...";
+                setTimeout(() => { btn.disabled = false; status.innerText = ""; }, 4000);
+            } catch (error) { status.innerText = "Błąd wysyłki."; btn.disabled = false; }
         });
 
-        // --- DANE KONTA (IKONA LUDZIKA) ---
+        // MODAL PROFILU LUDZIKA
         window.openUserModal = function() {
-            if(verifiedUserId) showScreen('screen-app');
-            else { showScreen('screen-login'); return; }
-
-            const uStatus = document.getElementById('user-status-tag');
+            if(verifiedUserId) showScreen('screen-app'); else { showScreen('screen-login'); return; }
             document.getElementById('user-company').innerText = localStorage.getItem('companyName');
             document.getElementById('user-email').innerText = localStorage.getItem('userEmail');
             document.getElementById('user-phone').innerText = localStorage.getItem('userPhone');
             document.getElementById('user-nip').innerText = localStorage.getItem('userNip');
-
             const status = localStorage.getItem('userStatus');
+            const uStatus = document.getElementById('user-status-tag');
             uStatus.innerText = status;
-            if(status === 'active') {
-                uStatus.className = "px-3 py-1.5 rounded-full font-black uppercase text-[10px] tracking-wider bg-green-50 text-green-700";
-            } else {
-                uStatus.className = "px-3 py-1.5 rounded-full font-black uppercase text-[10px] tracking-wider bg-slate-100 text-slate-500";
-            }
-
-            const modal = document.getElementById('user-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if(status === 'active') uStatus.className = "px-3 py-1.5 rounded-full font-black uppercase text-[10px] tracking-wider bg-green-50 text-green-700";
+            else uStatus.className = "px-3 py-1.5 rounded-full font-black uppercase text-[10px] tracking-wider bg-slate-100 text-slate-500";
+            document.getElementById('user-modal').classList.remove('hidden'); document.getElementById('user-modal').classList.add('flex');
         }
+        window.closeUserModal = () => { document.getElementById('user-modal').classList.add('hidden'); document.getElementById('user-modal').classList.remove('flex'); };
 
-        window.closeUserModal = () => {
-            document.getElementById('user-modal').classList.add('hidden');
-            document.getElementById('user-modal').classList.remove('flex');
-        };
-
-        // --- PUSH ---
+        // PUSH
         document.getElementById('btn-allow').addEventListener('click', async () => {
             const ind = document.getElementById('status-indicator');
             try {
                 const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
-                const token = await getToken(messaging, { 
-                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw', 
-                    serviceWorkerRegistration: reg 
-                });
+                const token = await getToken(messaging, { vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw', serviceWorkerRegistration: reg });
                 if (token && verifiedUserId) {
                     await updateDoc(doc(db, "users", verifiedUserId), { pushToken: token });
-                    localStorage.setItem('pushEnabled', 'true');
-                    document.getElementById('push-setup').classList.add('hidden');
+                    localStorage.setItem('pushEnabled', 'true'); document.getElementById('push-setup').classList.add('hidden');
                     ind.className = "w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-none";
                 }
-            } catch (e) { alert("Błąd aktywacji PUSH lub brak HTTPS."); }
+            } catch (e) { alert("Błąd aktywacji PUSH."); }
         });
 
-        // --- LOGOWANIE ORAZ ZAPISYWANIE PEŁNYCH DANYCH PROFILU ---
+        // LOGOWANIE
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const statusLabel = document.getElementById('login-status');
-            statusLabel.innerText = "Trwa autoryzacja...";
-
+            const label = document.getElementById('login-status'); label.innerText = "Trwa autoryzacja...";
             const q = query(collection(db, "users"), where("email", "==", document.getElementById('login-email').value.trim()), where("password", "==", document.getElementById('login-password').value));
             const snap = await getDocs(q);
-            if (snap.empty) { statusLabel.innerText = "Błąd danych logowania."; return; }
-            const u = snap.docs[0];
-            const data = u.data();
-
-            verifiedUserId = u.id;
-            localStorage.setItem('userDocId', u.id);
+            if (snap.empty) { label.innerText = "Błąd logowania."; return; }
+            const data = snap.docs[0].data();
+            localStorage.setItem('userDocId', snap.docs[0].id);
             localStorage.setItem('companyName', data.companyName);
             localStorage.setItem('userEmail', data.email);
             localStorage.setItem('userPhone', data.phone);
             localStorage.setItem('userNip', data.nip);
             localStorage.setItem('userStatus', data.status);
-            
             location.reload();
         });
 
         window.logout = () => {
-            localStorage.removeItem('userDocId');
-            localStorage.removeItem('companyName');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userPhone');
-            localStorage.removeItem('userNip');
-            localStorage.removeItem('userStatus');
-            location.reload();
+            localStorage.clear(); location.reload();
         }
 
+        // AKTYWNY PODGLĄD I DYNAMICZNE POBIERANIE OPIEKUNA Z LIKWIDACJĄ HARDCODE
         const sid = localStorage.getItem('userDocId');
         if(sid) { 
-            verifiedUserId = sid; 
-            showScreen('screen-app'); 
-            if(localStorage.getItem('pushEnabled')) {
-                document.getElementById('status-indicator').className = "w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-none";
-            } else {
-                document.getElementById('push-setup').classList.remove('hidden');
-            }
-        } else { 
-            showScreen('screen-login'); 
-        }
+            verifiedUserId = sid; showScreen('screen-app'); 
+            if(localStorage.getItem('pushEnabled')) { document.getElementById('status-indicator').className = "w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-none"; } 
+            else { document.getElementById('push-setup').classList.remove('hidden'); }
 
-        // PWA INSTALL
-        let defPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); defPrompt = e;
-            document.getElementById('install-banner').classList.remove('hidden');
-            document.getElementById('install-banner').classList.add('flex');
-        });
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            document.getElementById('install-banner').classList.add('hidden');
-            if (defPrompt) { defPrompt.prompt(); await defPrompt.userChoice; defPrompt = null; }
-        });
+            // Dynamiczny nasłuch przydzielonego opiekuna
+            onSnapshot(doc(db, "users", sid), (userSnap) => {
+                if(userSnap.exists()) {
+                    const uData = userSnap.data();
+                    if(uData.managerId) {
+                        onSnapshot(doc(db, "managers", uData.managerId), (mSnap) => {
+                            if(mSnap.exists()) {
+                                const mData = mSnap.data();
+                                document.getElementById('manager-name').innerText = mData.name;
+                                document.getElementById('manager-img').src = mData.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(mData.name)}&background=1e3a8a&color=fff`;
+                                document.getElementById('manager-phone-link').href = "tel:" + mData.phone;
+                                document.getElementById('manager-email-link').href = "mailto:" + mData.email;
+                            }
+                        });
+                    }
+                }
+            });
+        } else { showScreen('screen-login'); }
+
     </script>
 </body>
 </html>

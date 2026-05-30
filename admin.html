@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administratora - Instalbud</title>
+    <title>Panel Administratora - Instalbud B2B</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="bg-slate-50 font-sans p-6 min-h-screen">
 
-    <div class="max-w-6xl mx-auto space-y-8">
-        <!-- NAGŁÓWEK -->
+    <div class="max-w-6xl mx-auto space-y-8 pb-12">
         <header class="bg-blue-900 text-white p-6 rounded-[2rem] shadow-xl flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-4">
-                <div class="bg-white p-3 rounded-2xl shadow-inner text-red-600">
-                    <i class="fa-solid fa-hard-hat text-3xl"></i>
+                <div class="bg-white p-3 rounded-2xl shadow-inner">
+                    <img src="ib.png" alt="Instalbud Logo" class="h-10 object-contain">
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black uppercase tracking-tighter">Instalbud B2B <span class="text-red-500">Admin</span></h1>
-                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią i konfiguracja</p>
+                    <h1 class="text-2xl font-black uppercase tracking-tighter">B2B Admin</h1>
+                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią, mediami i konfiguracja</p>
                 </div>
             </div>
         </header>
 
-        <!-- ZARZĄDZANIE NAZWAMI ZAKŁADEK -->
         <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
             <div class="flex items-center space-x-3 mb-6">
                 <i class="fa-solid fa-sliders text-2xl text-red-600"></i>
@@ -58,68 +56,80 @@
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- PUBLIKOWANIE KOMUNIKATÓW -->
-            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
+            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 relative">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-paper-plane text-2xl text-red-600"></i>
-                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Opublikuj Komunikat</h2>
+                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Opublikuj Komunikat / Promocję</h2>
                 </div>
                 
                 <form id="form-new-message" class="space-y-5">
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Wybierz zakładkę w aplikacji</label>
                         <select id="msg-category" class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-bold text-blue-900">
-                            <option value="komunikaty">Zakładka 1 (Info / Wiadomości)</option>
-                            <option value="promocje">Zakładka 2 (Okazje / Promocje)</option>
+                            <option value="komunikaty">Zakładka 1 (Info)</option>
+                            <option value="promocje">Zakładka 2 (Okazje)</option>
                             <option value="iteam">Zakładka 3 (iTeam)</option>
-                            <option value="szkolenia">Zakładka 4 (Szkolenia / Nauka)</option>
+                            <option value="szkolenia">Zakładka 4 (Szkolenia)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Tytuł wiadomości</label>
+                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Tytuł</label>
                         <input type="text" id="msg-title" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 text-lg font-bold">
                     </div>
+                    
+                    <div class="border-2 border-slate-100 p-4 rounded-xl bg-slate-50">
+                        <label class="block text-xs font-bold mb-2 text-slate-500 uppercase">Dodaj grafikę (opcjonalnie)</label>
+                        <div class="flex items-center space-x-3">
+                            <label for="msg-image" class="bg-blue-900 text-white px-5 py-3 rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-transform">
+                                <i class="fa-solid fa-image mr-2"></i> Wybierz zdjęcie
+                            </label>
+                            <input type="file" id="msg-image" accept="image/*" class="hidden">
+                            <span id="image-file-name" class="text-xs text-slate-500 font-medium italic truncate">Nie wybrano zdjęcia...</span>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Krótki podgląd</label>
                         <input type="text" id="msg-preview" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-medium text-slate-700">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Pełna treść komunikatu</label>
+                        <label class="block text-xs font-bold mb-1 text-slate-500 uppercase tracking-wider">Pełna treść</label>
                         <textarea id="msg-body" rows="6" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 font-medium text-slate-700"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-700 cursor-pointer uppercase tracking-widest">
-                        Zapisz i Opublikuj
+                    <button type="submit" id="btn-message-send" class="w-full bg-red-600 text-white font-black py-4 rounded-xl shadow-lg hover:bg-red-700 cursor-pointer uppercase tracking-widest">
+                        Zapisz i Opublikuj w Bazie
                     </button>
-                    <p id="msg-status" class="text-sm text-center text-green-600 font-bold hidden mt-4 bg-green-50 p-3 rounded-xl border border-green-200">Wiadomość została opublikowana!</p>
+                    <p id="msg-status" class="hidden text-sm text-center font-bold mt-4 p-3 rounded-xl border"></p>
                 </form>
             </section>
 
-            <!-- ZARZĄDZANIE WNIOSKAMI -->
-            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col">
+            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col relative">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-users text-2xl text-blue-900"></i>
-                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Oczekujące wnioski</h2>
+                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Oczekujące wnioski o dostęp</h2>
                 </div>
                 
                 <div id="pending-users-list" class="space-y-4 overflow-y-auto flex-1 pr-2">
-                    <p class="text-sm text-slate-500 italic font-bold">Ładowanie wniosków z bazy danych...</p>
+                    <p class="text-sm text-slate-500 italic font-bold">Ładowanie wniosków...</p>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- LOGIKA FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
-            projectId: "aplikacja-608f2"
+            projectId: "aplikacja-608f2",
+            storageBucket: "aplikacja-608f2.firebasestorage.app" 
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app); 
 
         const settingsRef = doc(db, "settings", "ui_config");
         
@@ -143,54 +153,37 @@
             const btn = e.target.querySelector('button');
             const status = document.getElementById('settings-status');
             btn.disabled = true;
-
-            const newSettings = {
-                tab1: document.getElementById('tab1-name').value,
-                tab2: document.getElementById('tab2-name').value,
-                tab3: document.getElementById('tab3-name').value,
-                tab4: document.getElementById('tab4-name').value
-            };
-
             try {
-                await setDoc(settingsRef, newSettings, { merge: true });
+                await setDoc(settingsRef, {
+                    tab1: document.getElementById('tab1-name').value,
+                    tab2: document.getElementById('tab2-name').value,
+                    tab3: document.getElementById('tab3-name').value,
+                    tab4: document.getElementById('tab4-name').value
+                }, { merge: true });
                 status.classList.remove('hidden');
                 setTimeout(() => { status.classList.add('hidden'); btn.disabled = false; }, 3000);
-            } catch (error) {
-                alert("Błąd zapisu ustawień.");
-                btn.disabled = false;
-            }
+            } catch (error) { btn.disabled = false; }
         });
 
         const pendingList = document.getElementById('pending-users-list');
-        const q = query(collection(db, "users"), where("status", "==", "pending"));
-        
-        onSnapshot(q, (snapshot) => {
+        onSnapshot(query(collection(db, "users"), where("status", "==", "pending")), (snapshot) => {
             pendingList.innerHTML = ''; 
             if(snapshot.empty) {
-                pendingList.innerHTML = `
-                    <div class="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-2xl text-center">
-                        <i class="fa-solid fa-check-circle text-4xl text-slate-300 mb-3"></i>
-                        <p class="text-slate-500 font-bold uppercase tracking-wider text-sm">Brak nowych wniosków</p>
-                    </div>`;
+                pendingList.innerHTML = `<div class="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-2xl text-center"><i class="fa-solid fa-check-circle text-4xl text-slate-300 mb-3"></i><p class="text-slate-500 font-bold uppercase text-sm">Brak nowych wniosków</p></div>`;
                 return;
             }
-
             snapshot.forEach((userDoc) => {
                 const data = userDoc.data();
                 const card = document.createElement('div');
-                card.className = "border-2 border-slate-100 p-5 rounded-2xl flex flex-col space-y-3 bg-slate-50 shadow-sm";
+                card.className = "border-2 border-slate-100 p-5 rounded-2xl space-y-2.5 bg-slate-50 shadow-sm";
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <strong class="text-blue-900 font-black text-lg leading-tight">${data.companyName}</strong>
-                        <span class="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200">NIP: ${data.nip}</span>
-                    </div>
-                    <p class="text-sm text-slate-600 font-medium">${data.email}</p>
-                    <p class="text-sm text-slate-600 font-medium mb-2">${data.phone}</p>
-                    <div class="flex space-x-3 mt-4 pt-4 border-t-2 border-slate-200">
-                        <button onclick="approveUser('${userDoc.id}', '${data.email}')" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-green-700 cursor-pointer shadow-md"><i class="fa-solid fa-check mr-2"></i>Akceptuj</button>
-                        <button onclick="rejectUser('${userDoc.id}')" class="flex-1 bg-white border-2 border-red-100 text-red-600 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-red-50 cursor-pointer"><i class="fa-solid fa-xmark mr-2"></i>Odrzuć</button>
-                    </div>
-                `;
+                    <div class="flex justify-between items-start"><strong class="text-blue-900 font-black text-lg">${data.companyName}</strong><span class="text-xs font-bold text-slate-500 bg-white px-2 py-1 rounded-md border border-slate-200">NIP: ${data.nip}</span></div>
+                    <p class="text-sm text-slate-600 font-mediumbreak-all">${data.email}</p>
+                    <p class="text-sm text-slate-600 font-medium">${data.phone}</p>
+                    <div class="flex space-x-3 mt-3 pt-3 border-t-2">
+                        <button onclick="approveUser('${userDoc.id}', '${data.email}')" class="flex-1 bg-green-600 text-white py-2.5 rounded-lg text-xs font-black uppercase shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-check mr-2"></i>Akceptuj</button>
+                        <button onclick="rejectUser('${userDoc.id}')" class="flex-1 bg-white border-2 border-red-100 text-red-600 py-2.5 rounded-lg text-xs font-black uppercase active:scale-95 transition-transform"><i class="fa-solid fa-xmark mr-2"></i>Odrzuć</button>
+                    </div>`;
                 pendingList.appendChild(card);
             });
         });
@@ -199,39 +192,61 @@
             const pin = Math.floor(100000 + Math.random() * 900000).toString();
             await updateDoc(doc(db, "users", docId), { status: 'approved', pin: pin });
             const subject = encodeURIComponent("Dostęp do Instalbud B2B - Twój Kod PIN");
-            const body = encodeURIComponent(`Witaj,\n\nTwój wniosek został zaakceptowany!\n\nPIN do aktywacji to: ${pin}`);
+            const body = encodeURIComponent(`Witaj,\\n\\nTwój wniosek został zaakceptowany!\\n\\nPIN do aktywacji to: ${pin}`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
         window.rejectUser = async function(docId) {
-            if(confirm("Czy na pewno chcesz usunąć wniosek tej firmy?")) {
-                await deleteDoc(doc(db, "users", docId));
-            }
+            if(confirm("Czy na pewno chcesz usunąć wniosek?")) { await deleteDoc(doc(db, "users", docId)); }
         };
+
+        const msgImageInput = document.getElementById('msg-image');
+        const msgFileNameSpan = document.getElementById('image-file-name');
+
+        msgImageInput.addEventListener('change', () => {
+            const file = msgImageInput.files[0];
+            msgFileNameSpan.innerText = file ? file.name : "Nie wybrano zdjęcia...";
+        });
 
         document.getElementById('form-new-message').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
+            const btn = document.getElementById('btn-message-send');
             const status = document.getElementById('msg-status');
-            btn.disabled = true;
+            const imageFile = msgImageInput.files[0];
+            
+            btn.disabled = true; status.innerText = "Trwa publikowanie..."; status.className = "text-sm text-center font-bold mt-4 p-3 rounded-xl bg-blue-50 text-blue-900 animate-pulse";
+            status.classList.remove('hidden');
 
-            const today = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
-            const newMsg = {
-                category: document.getElementById('msg-category').value,
-                title: document.getElementById('msg-title').value,
-                preview: document.getElementById('msg-preview').value,
-                body: document.getElementById('msg-body').value,
-                date: today,
-                createdAt: new Date() 
-            };
+            let imageUrl = "";
 
             try {
-                await addDoc(collection(db, "messages"), newMsg);
-                status.classList.remove('hidden');
+                if (imageFile) {
+                    status.innerText = "Trwa upload zdjęcia...";
+                    const storageRef = ref(storage, `messages/${Date.now()}_${imageFile.name}`);
+                    const uploadSnap = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(uploadSnap.ref);
+                }
+
+                const today = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
+                await addDoc(collection(db, "messages"), {
+                    category: document.getElementById('msg-category').value,
+                    title: document.getElementById('msg-title').value,
+                    imageUrl: imageUrl, 
+                    preview: document.getElementById('msg-preview').value,
+                    body: document.getElementById('msg-body').value,
+                    date: today,
+                    createdAt: new Date() 
+                });
+
+                status.className = "text-sm text-center font-bold mt-4 p-3 rounded-xl bg-green-50 text-green-700 border border-green-200 block";
+                status.innerText = "Wiadomość z grafiką opublikowana pomyślnie!";
                 e.target.reset(); 
+                msgFileNameSpan.innerText = "Nie wybrano zdjęcia...";
                 setTimeout(() => { status.classList.add('hidden'); btn.disabled = false; }, 3000);
             } catch (error) {
-                alert("Wystąpił błąd podczas publikacji.");
+                console.error(error);
+                status.className = "text-sm text-center font-bold mt-4 p-3 rounded-xl bg-red-50 text-red-700 border border-red-200 block";
+                status.innerText = "Błąd zapisu w bazie danych.";
                 btn.disabled = false;
             }
         });

@@ -14,3 +14,8 @@ const messaging = firebase.messaging();
 // Nie dopisujemy tu żadnej logiki wywołującej "dymki".
 // Biblioteka Firebase sama przejmuje kontrolę i wyświetla okienka systemowe, 
 // gdy nadejdzie standardowa wiadomość typu "Notification" z konsoli.
+
+// Wymóg instalacji PWA: "Zaślepka" zdarzenia fetch
+self.addEventListener('fetch', function(event) {
+    // Przeglądarka widzi ten nasłuchiwacz i pozwala na wyświetlenie monitu o instalacji
+});

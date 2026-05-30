@@ -163,12 +163,26 @@
             window.scrollTo(0,0);
         }
 
-        window.switchTab = function(moduleId, btn) {
+window.switchTab = function(moduleId, btn) {
+            // 1. Zamknij okienko wiadomości (jeśli jakieś jest otwarte)
+            if (typeof closeModal === "function") closeModal();
+            
+            // 2. Wymuś powrót do głównego ekranu aplikacji (chowa ekran kontaktu)
+            showScreen('screen-app');
+
+            // 3. Przełącz zakładki
             document.querySelectorAll('.app-module').forEach(el => el.classList.add('hidden'));
             document.getElementById(moduleId).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('active-tab'); b.classList.add('text-slate-300'); });
+            
+            // 4. Zmień kolory przycisków w menu na aktywne
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.remove('active-tab'); 
+                b.classList.add('text-slate-300'); 
+            });
             btn.classList.remove('text-slate-300');
             btn.classList.add('active-tab');
+            
+            // 5. Przewiń stronę na samą górę
             window.scrollTo(0,0);
         }
 

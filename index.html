@@ -11,18 +11,17 @@
     <style>
         body { -webkit-tap-highlight-color: transparent; scrollbar-width: none; touch-action: pan-y; }
         body::-webkit-scrollbar { display: none; }
-        /* Usunięto problematyczne transform, zostawiamy tylko FadeIn */
         .screen-transition { animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .active-tab { color: #dc2626 !important; transform: scale(1.08); transition: all 0.2s; }
         .unread-glow { border-left: 6px solid #dc2626 !important; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.1); }
         .safe-width { width: 100%; max-width: 100vw; overflow-x: hidden; }
-        /* Wymuszenie pozycji dolnego paska */
         nav { position: fixed !important; bottom: 0 !important; left: 0; right: 0; z-index: 9999; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans safe-width pb-28">
 
+    <!-- BANER INSTALACJI PWA -->
     <div id="install-banner" class="hidden fixed bottom-28 left-4 right-4 bg-slate-950 text-white p-5 rounded-2xl shadow-2xl z-[100] justify-between items-center border-2 border-red-600 mx-auto max-w-lg">
         <div class="flex-1 pr-4">
             <h3 class="font-bold text-base mb-1 text-red-500 uppercase">Zainstaluj Instalbud</h3>
@@ -31,6 +30,7 @@
         <button id="btn-install" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl text-xs">INSTALUJ</button>
     </div>
 
+    <!-- EKRAN LOGOWANIA -->
     <div id="screen-login" class="flex flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <h1 class="text-3xl font-black text-blue-900 mb-6 text-center uppercase tracking-tighter">Instalbud B2B</h1>
@@ -47,6 +47,38 @@
         </div>
     </div>
 
+    <!-- EKRAN REJESTRACJI -->
+    <div id="screen-register" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
+            <h1 class="text-2xl font-black text-blue-900 mb-6 text-center uppercase tracking-tighter">Wniosek o dostęp</h1>
+            <form id="form-register" class="space-y-4">
+                <input type="text" id="reg-name" placeholder="Nazwa Firmy" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <input type="text" id="reg-nip" placeholder="NIP" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <input type="email" id="reg-email" placeholder="Adres E-mail" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <input type="tel" id="reg-phone" placeholder="Telefon" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <button type="submit" class="w-full bg-blue-900 text-white font-black py-4 rounded-xl shadow-lg uppercase">Wyślij wniosek</button>
+                <p id="reg-status" class="text-sm text-center text-red-500 font-semibold"></p>
+            </form>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-xs font-bold text-slate-400 uppercase">Wróć do logowania</button>
+        </div>
+    </div>
+
+    <!-- EKRAN AKTYWACJI -->
+    <div id="screen-activation" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
+            <h1 class="text-2xl font-black text-blue-900 mb-4 text-center uppercase tracking-tighter">Aktywacja Konta</h1>
+            <form id="form-activation" class="space-y-4">
+                <input type="email" id="act-email" placeholder="E-mail" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <input type="text" id="act-pin" placeholder="6-cyfrowy PIN" maxlength="6" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl text-center tracking-widest text-xl font-black focus:border-red-600 outline-none">
+                <input type="password" id="act-password" placeholder="Nowe hasło" required class="w-full px-4 py-3 bg-slate-50 border-2 rounded-xl focus:border-red-600 outline-none">
+                <button type="submit" class="w-full bg-green-600 text-white font-black py-4 rounded-xl shadow-lg uppercase">Aktywuj</button>
+                <p id="act-status" class="text-sm text-center text-red-500 font-semibold"></p>
+            </form>
+            <button onclick="showScreen('screen-login')" class="mt-4 w-full text-xs font-bold text-slate-400 uppercase">Anuluj</button>
+        </div>
+    </div>
+
+    <!-- GŁÓWNA APLIKACJA -->
     <div id="screen-app" class="hidden">
         <header class="bg-blue-900 text-white p-5 shadow-xl sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
             <h1 class="text-lg font-black uppercase tracking-tight">Instalbud B2B</h1>
@@ -62,6 +94,7 @@
                 <button id="btn-allow" class="w-full bg-white text-red-600 font-black py-2 rounded-xl text-xs uppercase">Aktywuj</button>
             </div>
 
+            <!-- POPRAWIONE ID KONTENERÓW (module-...) -->
             <div id="module-komunikaty" class="app-module space-y-4"></div>
             <div id="module-promocje" class="app-module hidden space-y-4"></div>
             <div id="module-iteam" class="app-module hidden space-y-4"></div>
@@ -69,6 +102,7 @@
         </main>
     </div>
 
+    <!-- ZAPYTANIE OFERTOWE -->
     <div id="screen-contact" class="hidden flex-col min-h-screen bg-slate-50 safe-width">
         <header class="bg-blue-900 text-white p-5 flex items-center space-x-4 border-b-4 border-red-600">
             <button onclick="showScreen('screen-app')" class="p-2 bg-blue-800 rounded-xl"><i class="fa-solid fa-arrow-left"></i></button>
@@ -92,14 +126,15 @@
         </main>
     </div>
 
+    <!-- MENU DOLNE -->
     <nav class="bg-white border-t-2 flex justify-around py-3 shadow-2xl">
         <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-900 flex flex-col items-center flex-1 active-tab">
             <i class="fa-solid fa-bullhorn text-2xl mb-0.5"></i>
-            <span class="text-[9px] font-black uppercase">Info</span>
+            <span id="nav-label-komunikaty" class="text-[9px] font-black uppercase">Info</span>
         </button>
         <button onclick="switchTab('module-promocje', this)" class="nav-btn text-slate-300 flex flex-col items-center flex-1">
             <i class="fa-solid fa-tags text-2xl mb-0.5"></i>
-            <span class="text-[9px] font-black uppercase">Okazje</span>
+            <span id="nav-label-promocje" class="text-[9px] font-black uppercase">Okazje</span>
         </button>
         <button onclick="showScreen('screen-contact')" class="flex flex-col items-center flex-1 relative -top-6">
             <div class="bg-red-600 text-white p-4 rounded-full shadow-2xl border-4 border-white active:scale-90 transition-transform">
@@ -109,14 +144,16 @@
         </button>
         <button onclick="switchTab('module-iteam', this)" class="nav-btn text-slate-300 flex flex-col items-center flex-1">
             <i class="fa-solid fa-microchip text-2xl mb-0.5"></i>
-            <span class="text-[9px] font-black uppercase">iTeam</span>
+            <span id="nav-label-iteam" class="text-[9px] font-black uppercase">iTeam</span>
         </button>
         <button onclick="switchTab('module-szkolenia', this)" class="nav-btn text-slate-300 flex flex-col items-center flex-1">
             <i class="fa-solid fa-graduation-cap text-2xl mb-0.5"></i>
-            <span class="text-[9px] font-black uppercase">Nauka</span>
+            <!-- ZMIANA NA SZKOLENIA (DOMYŚLNA) -->
+            <span id="nav-label-szkolenia" class="text-[9px] font-black uppercase">Szkolenia</span>
         </button>
     </nav>
 
+    <!-- OKNO MODALNE (Wiadomości) -->
     <div id="message-modal" class="fixed inset-0 bg-blue-900/80 z-[1000] hidden flex-col justify-end">
         <div class="bg-white w-full rounded-t-[2.5rem] p-8 max-h-[90vh] overflow-y-auto screen-transition">
             <div class="flex justify-between items-center mb-6">
@@ -131,7 +168,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
             authDomain: "aplikacja-608f2.firebaseapp.com",
@@ -143,6 +181,40 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
+
+        let verifiedUserId = null;
+        window.currentLiveMessages = [];
+
+        // DYNAMICZNE NAZWY ZAKŁADEK (NASŁUCHIWANIE Z BAZY)
+        onSnapshot(doc(db, "settings", "ui_config"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if(data.tab1) document.getElementById('nav-label-komunikaty').innerText = data.tab1;
+                if(data.tab2) document.getElementById('nav-label-promocje').innerText = data.tab2;
+                if(data.tab3) document.getElementById('nav-label-iteam').innerText = data.tab3;
+                if(data.tab4) document.getElementById('nav-label-szkolenia').innerText = data.tab4;
+            }
+        });
+
+        // POPRAWIONA LOGIKA ZAKŁADEK - wymusza powrót z ekranu kontaktu
+        window.switchTab = function(moduleId, btn) {
+            if (typeof closeModal === "function") closeModal();
+            
+            // Przywraca główny ekran, chowa formularz zapytania
+            showScreen('screen-app');
+
+            document.querySelectorAll('.app-module').forEach(el => el.classList.add('hidden'));
+            document.getElementById(moduleId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.remove('active-tab'); 
+                b.classList.add('text-slate-300'); 
+            });
+            btn.classList.remove('text-slate-300');
+            btn.classList.add('active-tab');
+            window.scrollTo(0,0);
+        }
 
         window.showScreen = function(screenId) {
             document.getElementById('screen-login').classList.add('hidden');
@@ -155,7 +227,6 @@
             target.classList.remove('hidden');
             target.classList.add('screen-transition');
             
-            // Pasek menu widoczny tylko w aplikacji
             const nav = document.querySelector('nav');
             if(screenId === 'screen-app' || screenId === 'screen-contact') nav.classList.remove('hidden');
             else nav.classList.add('hidden');
@@ -163,30 +234,7 @@
             window.scrollTo(0,0);
         }
 
-window.switchTab = function(moduleId, btn) {
-            // 1. Zamknij okienko wiadomości (jeśli jakieś jest otwarte)
-            if (typeof closeModal === "function") closeModal();
-            
-            // 2. Wymuś powrót do głównego ekranu aplikacji (chowa ekran kontaktu)
-            showScreen('screen-app');
-
-            // 3. Przełącz zakładki
-            document.querySelectorAll('.app-module').forEach(el => el.classList.add('hidden'));
-            document.getElementById(moduleId).classList.remove('hidden');
-            
-            // 4. Zmień kolory przycisków w menu na aktywne
-            document.querySelectorAll('.nav-btn').forEach(b => { 
-                b.classList.remove('active-tab'); 
-                b.classList.add('text-slate-300'); 
-            });
-            btn.classList.remove('text-slate-300');
-            btn.classList.add('active-tab');
-            
-            // 5. Przewiń stronę na samą górę
-            window.scrollTo(0,0);
-        }
-
-        // --- OBSŁUGA KOMUNIKATÓW Z BAZY ---
+        // --- OBSŁUGA KOMUNIKATÓW Z BAZY (POPRAWIONE MODULE-...) ---
         onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
             document.querySelectorAll('.app-module').forEach(el => el.innerHTML = '');
             const readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
@@ -205,16 +253,22 @@ window.switchTab = function(moduleId, btn) {
                     <p class="text-sm text-slate-600 line-clamp-2">${msg.preview}</p>
                     <div class="text-[9px] font-black text-slate-400 mt-3 uppercase">${msg.date}</div>
                 `;
-                const container = document.getElementById(`list-${msg.category}`);
+                const container = document.getElementById(`module-${msg.category}`); // POPRAWKA: 'module-'
                 if(container) container.appendChild(card);
             });
         });
 
-        function openModal(msg) {
+        window.openModal = function(msg) {
             let readMsgs = JSON.parse(localStorage.getItem('readMsgs') || '[]');
             if (!readMsgs.includes(msg.id)) {
                 readMsgs.push(msg.id);
                 localStorage.setItem('readMsgs', JSON.stringify(readMsgs));
+                
+                const cardElem = document.getElementById(`card-${msg.id}`);
+                if (cardElem) {
+                    cardElem.classList.remove('border-blue-900', 'unread-glow');
+                    cardElem.classList.add('border-slate-200', 'opacity-75');
+                }
             }
             document.getElementById('modal-title').innerText = msg.title;
             document.getElementById('modal-date').innerText = msg.date;
@@ -228,6 +282,45 @@ window.switchTab = function(moduleId, btn) {
             document.getElementById('message-modal').classList.remove('flex');
         };
 
+        // --- ZAPYTANIA OFERTOWE ---
+        document.getElementById('form-inquiry').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = document.getElementById('inq-status');
+            const btn = e.target.querySelector('button');
+            btn.disabled = true; status.innerText = "Wysyłanie...";
+            try {
+                await addDoc(collection(db, "inquiries"), {
+                    userId: verifiedUserId || "guest",
+                    companyName: localStorage.getItem('companyName') || "Niezalogowany",
+                    message: document.getElementById('inq-body').value.trim(),
+                    status: "new",
+                    createdAt: new Date()
+                });
+                status.className = "text-center text-sm font-bold text-green-600 mt-2";
+                status.innerText = "Zapytanie wysłane!";
+                e.target.reset();
+                setTimeout(() => { btn.disabled = false; status.innerText = ""; }, 4000);
+            } catch (error) { status.innerText = "Błąd wysyłki."; btn.disabled = false; }
+        });
+
+        // --- PUSH ---
+        document.getElementById('btn-allow').addEventListener('click', async () => {
+            const ind = document.getElementById('status-indicator');
+            try {
+                const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+                const token = await getToken(messaging, { 
+                    vapidKey: 'BLN7m6FmNJKz9y8c_UYzA0TJKN8lrIcj0sAFfMr1WUUjXfeONIP8IWfDUyYMMRBsxgnKbvxalxbA85oZxLuIlMw', 
+                    serviceWorkerRegistration: reg 
+                });
+                if (token && verifiedUserId) {
+                    await updateDoc(doc(db, "users", verifiedUserId), { pushToken: token });
+                    localStorage.setItem('pushEnabled', 'true');
+                    document.getElementById('push-setup').classList.add('hidden');
+                    ind.className = "w-4 h-4 bg-green-500 rounded-full border-2 border-white";
+                }
+            } catch (e) { alert("Błąd aktywacji PUSH."); }
+        });
+
         // --- LOGOWANIE I START ---
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -235,6 +328,7 @@ window.switchTab = function(moduleId, btn) {
             const snap = await getDocs(q);
             if (snap.empty) { document.getElementById('login-status').innerText = "Błąd danych."; return; }
             const u = snap.docs[0];
+            verifiedUserId = u.id;
             localStorage.setItem('userDocId', u.id);
             localStorage.setItem('companyName', u.data().companyName);
             location.reload();
@@ -247,9 +341,30 @@ window.switchTab = function(moduleId, btn) {
         }
 
         const sid = localStorage.getItem('userDocId');
-        if(sid) { showScreen('screen-app'); } else { showScreen('screen-login'); }
+        if(sid) { 
+            verifiedUserId = sid; 
+            showScreen('screen-app'); 
+            if(localStorage.getItem('pushEnabled')) {
+                document.getElementById('status-indicator').className = "w-4 h-4 bg-green-500 rounded-full border-2 border-white";
+            } else {
+                document.getElementById('push-setup').classList.remove('hidden');
+            }
+        } else { 
+            showScreen('screen-login'); 
+        }
+
+        // PWA INSTALL
+        let defPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); defPrompt = e;
+            document.getElementById('install-banner').classList.remove('hidden');
+            document.getElementById('install-banner').classList.add('flex');
+        });
+        document.getElementById('btn-install').addEventListener('click', async () => {
+            document.getElementById('install-banner').classList.add('hidden');
+            if (defPrompt) { defPrompt.prompt(); await defPrompt.userChoice; defPrompt = null; }
+        });
 
     </script>
 </body>
 </html>
-

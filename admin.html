@@ -7,9 +7,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="bg-slate-50 font-sans p-6 min-h-screen">
+<body class="bg-slate-50 font-sans p-6 min-h-screen relative">
 
-    <div class="max-w-6xl mx-auto space-y-8 pb-12">
+    <div id="admin-login-screen" class="fixed inset-0 bg-slate-900 z-[9999] flex flex-col items-center justify-center p-6">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border-b-8 border-red-600">
+            <div class="bg-blue-950 p-5 rounded-2xl inline-block mb-6 shadow-inner border border-blue-800">
+                <i class="fa-solid fa-user-shield text-4xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-black text-blue-900 uppercase tracking-tighter mb-2">Dostęp Zastrzeżony</h2>
+            <p class="text-xs text-slate-500 font-bold mb-8 uppercase tracking-widest">Podaj hasło administratora</p>
+            
+            <form id="admin-login-form" class="space-y-4">
+                <input type="password" id="admin-password" placeholder="Wpisz hasło..." required class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-red-600 outline-none text-center font-black tracking-widest text-lg transition-colors">
+                <button type="submit" id="btn-admin-login" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase shadow-lg hover:bg-red-700 transition cursor-pointer text-sm tracking-wider">Odblokuj Panel</button>
+                <p id="admin-login-error" class="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 hidden mt-4">Nieprawidłowe hasło!</p>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-dashboard-screen" class="max-w-6xl mx-auto space-y-8 pb-12 hidden opacity-0 transition-opacity duration-500">
+        
         <header class="bg-blue-900 text-white p-6 rounded-[2rem] shadow-xl flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-4">
                 <div class="bg-blue-950 p-3 rounded-2xl shadow-inner border border-blue-800">
@@ -20,6 +37,9 @@
                     <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią, autoryzacje i CRM</p>
                 </div>
             </div>
+            <button onclick="logoutAdmin()" class="bg-red-600 text-white font-black px-5 py-3 rounded-xl uppercase text-xs shadow-md hover:bg-red-700 transition cursor-pointer flex items-center">
+                <i class="fa-solid fa-power-off md:mr-2"></i> <span class="hidden md:inline">Wyloguj</span>
+            </button>
         </header>
 
         <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col md:col-span-2">
@@ -223,37 +243,164 @@
         
         const settingsRef = doc(db, "settings", "ui_config");
         const mailConfigRef = doc(db, "settings", "mail_config");
+        const adminAuthRef = doc(db, "settings", "admin_auth"); // Referencja do hasła admina
 
         let pendingUsersGlobalList = [];
         let allMessagesAdminData = [];
         let currentEditMessageId = null;
         let currentEditImageUrl = "";
-        
-        // Zmienna przechowująca wszystkich klientów dla wyszukiwarki
         let allActiveClientsData = []; 
 
-        // --- ZAKŁADKI ---
-        getDoc(settingsRef).then((docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if(data.tab1) document.getElementById('tab1-name').value = data.tab1;
-                if(data.tab2) document.getElementById('tab2-name').value = data.tab2;
-                if(data.tab3) document.getElementById('tab3-name').value = data.tab3;
-                if(data.tab4) document.getElementById('tab4-name').value = data.tab4;
-            }
-        });
-        
-        // --- KONFIGURACJA POCZTY W PANELU ADMINA ---
-        getDoc(mailConfigRef).then((docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if(data.emailjsKey) document.getElementById('mail-public-key').value = data.emailjsKey;
-                if(data.emailjsServiceId) document.getElementById('mail-service-id').value = data.emailjsServiceId;
-                if(data.emailjsTemplateId) document.getElementById('mail-template-id').value = data.emailjsTemplateId;
+        // --- LOGIKA LOGOWANIA ADMINA ---
+        const DEFAULT_PASSWORD = "admin123";
+        const loginScreen = document.getElementById('admin-login-screen');
+        const dashboardScreen = document.getElementById('admin-dashboard-screen');
+        const loginForm = document.getElementById('admin-login-form');
+        const loginError = document.getElementById('admin-login-error');
+        const btnAdminLogin = document.getElementById('btn-admin-login');
+
+        // Funkcja wylogowania (przypięta do przycisku w nagłówku)
+        window.logoutAdmin = function() {
+            sessionStorage.removeItem('adminIsLogged');
+            location.reload();
+        };
+
+        // Funkcja pokazująca główny panel i inicjująca pobieranie danych
+        function unlockDashboard() {
+            loginScreen.classList.add('hidden');
+            dashboardScreen.classList.remove('hidden');
+            setTimeout(() => { dashboardScreen.classList.remove('opacity-0'); }, 50);
+            
+            // Dopiero po zalogowaniu zaczynamy nasłuchiwać dane z Firebase, co oszczędza transfer!
+            initializeDataListeners();
+        }
+
+        // Sprawdzanie przy odświeżeniu, czy użytkownik ma aktywną sesję
+        if (sessionStorage.getItem('adminIsLogged') === 'true') {
+            unlockDashboard();
+        }
+
+        // Obsługa wysłania formularza logowania
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const passInput = document.getElementById('admin-password').value;
+            btnAdminLogin.disabled = true;
+            btnAdminLogin.innerText = "Sprawdzanie...";
+            loginError.classList.add('hidden');
+
+            try {
+                const snap = await getDoc(adminAuthRef);
+                let correctPassword = DEFAULT_PASSWORD;
+
+                // Sprawdzamy czy dokument w bazie istnieje, jeśli nie - tworzymy go z domyślnym hasłem
+                if (snap.exists() && snap.data().password) {
+                    correctPassword = snap.data().password;
+                } else {
+                    await setDoc(adminAuthRef, { password: DEFAULT_PASSWORD });
+                }
+
+                if (passInput === correctPassword) {
+                    sessionStorage.setItem('adminIsLogged', 'true');
+                    unlockDashboard();
+                } else {
+                    loginError.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                loginError.innerText = "Błąd połączenia z bazą danych.";
+                loginError.classList.remove('hidden');
+            } finally {
+                btnAdminLogin.disabled = false;
+                btnAdminLogin.innerText = "Odblokuj Panel";
             }
         });
 
-        // ZAPIS ZAKŁADEK
+
+        // --- GŁÓWNA LOGIKA DANYCH (Uruchamiana dopiero po zalogowaniu) ---
+        function initializeDataListeners() {
+            
+            // --- ZAKŁADKI I POCZTA ---
+            getDoc(settingsRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.tab1) document.getElementById('tab1-name').value = data.tab1;
+                    if(data.tab2) document.getElementById('tab2-name').value = data.tab2;
+                    if(data.tab3) document.getElementById('tab3-name').value = data.tab3;
+                    if(data.tab4) document.getElementById('tab4-name').value = data.tab4;
+                }
+            });
+            
+            getDoc(mailConfigRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.emailjsKey) document.getElementById('mail-public-key').value = data.emailjsKey;
+                    if(data.emailjsServiceId) document.getElementById('mail-service-id').value = data.emailjsServiceId;
+                    if(data.emailjsTemplateId) document.getElementById('mail-template-id').value = data.emailjsTemplateId;
+                }
+            });
+
+            // --- LISTA KOMUNIKATÓW ---
+            onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
+                allMessagesAdminData = [];
+                const messagesListContainer = document.getElementById('published-messages-list');
+                messagesListContainer.innerHTML = '';
+                
+                if(snapshot.empty) {
+                    messagesListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400 col-span-full">Brak opublikowanych komunikatów.</div>`;
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const msg = docSnap.data();
+                    const id = docSnap.id;
+                    allMessagesAdminData.push({ id: id, ...msg });
+                    
+                    const card = document.createElement('div');
+                    card.className = "border-2 border-slate-100 p-4 rounded-xl flex justify-between items-center bg-slate-50 shadow-sm transition hover:shadow-md";
+                    
+                    let eventBadge = msg.isEvent ? `<span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded ml-2 uppercase"><i class="fa-solid fa-calendar mr-1"></i> Wydarzenie</span>` : '';
+                    let linkBadge = msg.hasLink ? `<span class="bg-green-100 text-green-800 text-[9px] font-black px-2 py-0.5 rounded ml-1 uppercase"><i class="fa-solid fa-link mr-1"></i> Link</span>` : '';
+                    
+                    card.innerHTML = `
+                        <div class="flex-1 pr-4 truncate">
+                            <div class="flex items-center mb-1">
+                                <span class="text-[9px] font-black text-slate-500 uppercase bg-white px-2 py-0.5 rounded border mr-2">${msg.category}</span>
+                                <span class="text-xs font-bold text-slate-400">${msg.date}</span>
+                                ${eventBadge} ${linkBadge}
+                            </div>
+                            <h3 class="font-bold text-blue-900 text-sm truncate" title="${msg.title}">${msg.title}</h3>
+                        </div>
+                        <div class="flex space-x-2 flex-shrink-0">
+                            <button onclick="editMessage('${id}')" class="bg-white border border-blue-200 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors shadow-sm" title="Edytuj ten komunikat">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteMessage('${id}')" class="bg-white border border-red-200 text-red-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors shadow-sm" title="Usuń ten komunikat">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                    messagesListContainer.appendChild(card);
+                });
+            });
+
+            // --- WNIOSKI OCZEKUJĄCE ---
+            onSnapshot(query(collection(db, "users"), where("status", "==", "pending")), (snapshot) => {
+                pendingUsersGlobalList = []; snapshot.forEach((docSnap) => { pendingUsersGlobalList.push({ id: docSnap.id, ...docSnap.data() }); });
+                renderPendingUsersSection();
+            });
+
+            // --- ZARZĄDZANIE KONTAMI KLIENTÓW ---
+            onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
+                allActiveClientsData = [];
+                snapshot.forEach((docSnap) => {
+                    allActiveClientsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderActiveClients();
+            });
+        }
+
+
+        // ZAPIS ZAKŁADEK (Nasłuchiwacze dla formularzy)
         document.getElementById('form-settings').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = e.target.querySelector('button'); btn.disabled = true;
             try {
@@ -279,20 +426,15 @@
             } catch (e) { btn.disabled = false; }
         });
 
-        // --- OBSŁUGA WYDARZEŃ UI (KALENDARZ & LINK) ---
         document.getElementById('msg-is-event').addEventListener('change', function() {
-            const eventFields = document.getElementById('event-fields');
-            if(this.checked) eventFields.classList.remove('hidden');
-            else eventFields.classList.add('hidden');
+            document.getElementById('event-fields').classList.toggle('hidden', !this.checked);
         });
         
         document.getElementById('msg-has-link').addEventListener('change', function() {
-            const linkFields = document.getElementById('link-fields');
-            if(this.checked) linkFields.classList.remove('hidden');
-            else linkFields.classList.add('hidden');
+            document.getElementById('link-fields').classList.toggle('hidden', !this.checked);
         });
 
-        // --- LOGIKA FORMULARZA KOMUNIKATU (TWORZENIE I EDYCJA) ---
+        // TWORZENIE/EDYCJA KOMUNIKATU
         document.getElementById('form-new-message').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-message-send'); 
@@ -367,51 +509,6 @@
             }
         });
 
-        // --- LISTA OPUBLIKOWANYCH KOMUNIKATÓW ---
-        onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
-            allMessagesAdminData = [];
-            const messagesListContainer = document.getElementById('published-messages-list');
-            messagesListContainer.innerHTML = '';
-            
-            if(snapshot.empty) {
-                messagesListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400 col-span-full">Brak opublikowanych komunikatów.</div>`;
-                return;
-            }
-
-            snapshot.forEach((docSnap) => {
-                const msg = docSnap.data();
-                const id = docSnap.id;
-                allMessagesAdminData.push({ id: id, ...msg });
-                
-                const card = document.createElement('div');
-                card.className = "border-2 border-slate-100 p-4 rounded-xl flex justify-between items-center bg-slate-50 shadow-sm transition hover:shadow-md";
-                
-                let eventBadge = msg.isEvent ? `<span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded ml-2 uppercase"><i class="fa-solid fa-calendar mr-1"></i> Wydarzenie</span>` : '';
-                let linkBadge = msg.hasLink ? `<span class="bg-green-100 text-green-800 text-[9px] font-black px-2 py-0.5 rounded ml-1 uppercase"><i class="fa-solid fa-link mr-1"></i> Link</span>` : '';
-                
-                card.innerHTML = `
-                    <div class="flex-1 pr-4 truncate">
-                        <div class="flex items-center mb-1">
-                            <span class="text-[9px] font-black text-slate-500 uppercase bg-white px-2 py-0.5 rounded border mr-2">${msg.category}</span>
-                            <span class="text-xs font-bold text-slate-400">${msg.date}</span>
-                            ${eventBadge} ${linkBadge}
-                        </div>
-                        <h3 class="font-bold text-blue-900 text-sm truncate" title="${msg.title}">${msg.title}</h3>
-                    </div>
-                    <div class="flex space-x-2 flex-shrink-0">
-                        <button onclick="editMessage('${id}')" class="bg-white border border-blue-200 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors shadow-sm" title="Edytuj ten komunikat">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button onclick="deleteMessage('${id}')" class="bg-white border border-red-200 text-red-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors shadow-sm" title="Usuń ten komunikat">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                `;
-                messagesListContainer.appendChild(card);
-            });
-        });
-
-        // --- FUNKCJE EDYCJI KOMUNIKATÓW ---
         window.editMessage = function(docId) {
             const msg = allMessagesAdminData.find(m => m.id === docId);
             if(!msg) return;
@@ -466,7 +563,6 @@
             }
         };
 
-        // --- WNIOSKI OCZEKUJĄCE ---
         function renderPendingUsersSection() {
             const pendingListContainer = document.getElementById('pending-users-list');
             pendingListContainer.innerHTML = '';
@@ -492,11 +588,6 @@
             });
         }
 
-        onSnapshot(query(collection(db, "users"), where("status", "==", "pending")), (snapshot) => {
-            pendingUsersGlobalList = []; snapshot.forEach((docSnap) => { pendingUsersGlobalList.push({ id: docSnap.id, ...docSnap.data() }); });
-            renderPendingUsersSection();
-        });
-
         window.approveUserWithManager = async function(docId, email) {
             const selectedManagerId = document.getElementById(`input-manager-${docId}`).value.trim();
             if(!selectedManagerId) { alert("Błąd: Musisz podać ID opiekuna!"); return; }
@@ -510,9 +601,7 @@
         window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) await deleteDoc(doc(db, "users", docId)); };
 
 
-        // --- NOWE ZARZĄDZANIE KONTAMI KLIENTÓW (ZWIJANA LISTA + WYSZUKIWARKA) ---
-        
-        // Podpięcie wyszukiwarki do pola input
+        // --- LOGIKA KLIENTÓW CRM (WYSZUKIWARKA I AKORDEON) ---
         document.getElementById('search-client').addEventListener('input', renderActiveClients);
         
         function renderActiveClients() {
@@ -520,7 +609,6 @@
             const searchTerm = document.getElementById('search-client').value.toLowerCase();
             clientsListContainer.innerHTML = '';
             
-            // Filtrowanie bazy po wpisanej frazie
             const filteredClients = allActiveClientsData.filter(user => {
                 const name = (user.companyName || '').toLowerCase();
                 const nip = (user.nip || '').toLowerCase();
@@ -590,11 +678,9 @@
             });
         }
 
-        // Globalna funkcja rozwijająca/zwijająca panel klienta
         window.toggleClientDetails = function(id) {
             const details = document.getElementById(`details-client-${id}`);
             const icon = document.getElementById(`icon-client-${id}`);
-            
             if(details.classList.contains('hidden')) {
                 details.classList.remove('hidden');
                 icon.classList.add('rotate-180');
@@ -603,15 +689,6 @@
                 icon.classList.remove('rotate-180');
             }
         };
-
-        // Nasłuchiwanie zmian w bazie Firebase i inicjalizacja listy
-        onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
-            allActiveClientsData = [];
-            snapshot.forEach((docSnap) => {
-                allActiveClientsData.push({ id: docSnap.id, ...docSnap.data() });
-            });
-            renderActiveClients();
-        });
 
         window.updateClient = async function(docId) {
             try {

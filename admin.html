@@ -10,6 +10,7 @@
 <body class="bg-slate-50 font-sans p-6 min-h-screen">
 
     <div class="max-w-6xl mx-auto space-y-8 pb-12">
+        <!-- NAGŁÓWEK -->
         <header class="bg-blue-900 text-white p-6 rounded-[2rem] shadow-xl flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-4">
                 <div class="bg-blue-950 p-3 rounded-2xl shadow-inner border border-blue-800">
@@ -17,11 +18,12 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black uppercase tracking-tighter">B2B Admin</h1>
-                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią i autoryzacje wniosków</p>
+                    <p class="text-xs font-bold text-blue-200 tracking-widest uppercase mt-1">Zarządzanie treścią, autoryzacje i CRM</p>
                 </div>
             </div>
         </header>
 
+        <!-- KONFIGURACJA ZAKŁADEK -->
         <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
             <div class="flex items-center space-x-3 mb-6">
                 <i class="fa-solid fa-sliders text-2xl text-red-600"></i>
@@ -110,7 +112,7 @@
                         </div>
                     </div>
 
-                    <!-- NOWA SEKCJA OPCJI LINKU ZEWNĘTRZNEGO -->
+                    <!-- SEKCJA OPCJI LINKU ZEWNĘTRZNEGO -->
                     <div class="border-2 border-green-100 p-4 rounded-xl bg-green-50 mt-4">
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="checkbox" id="msg-has-link" class="w-5 h-5 accent-green-600 cursor-pointer">
@@ -132,17 +134,31 @@
                 </form>
             </section>
 
-            <!-- ZARZĄDZANIE WNIOSKAMI RĘCZNY PRZYDZIAŁ OPIEKUNA -->
+            <!-- ZARZĄDZANIE WNIOSKAMI (OCZEKUJĄCY KLIENCI) -->
             <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col">
                 <div class="flex items-center space-x-3 mb-6">
-                    <i class="fa-solid fa-users text-2xl text-blue-900"></i>
+                    <i class="fa-solid fa-user-clock text-2xl text-blue-900"></i>
                     <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Oczekujące wnioski o dostęp</h2>
                 </div>
                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs text-blue-900 mb-4 font-medium">
                     Przy akceptacji wniosku wpisz <b>ID dokumentu opiekuna</b> utworzone ręcznie w Firebase (kolekcja 'managers').
                 </div>
-                <div id="pending-users-list" class="space-y-4 overflow-y-auto flex-1 pr-2">
+                <div id="pending-users-list" class="space-y-4 overflow-y-auto max-h-[600px] pr-2">
                     <p class="text-sm text-slate-500 italic">Ładowanie wniosków...</p>
+                </div>
+            </section>
+            
+            <!-- NOWY MODUŁ: ZARZĄDZANIE KONTAMI KLIENTÓW (CRM) -->
+            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col md:col-span-2">
+                <div class="flex items-center space-x-3 mb-6">
+                    <i class="fa-solid fa-address-book text-2xl text-blue-900"></i>
+                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Konta Klientów (Baza CRM)</h2>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs text-blue-900 mb-4 font-medium">
+                    Edytuj dane zaakceptowanych klientów oraz zmieniaj ich przypisanych opiekunów. Zmiana ID opiekuna natychmiast przekieruje nowe zapytania ofertowe do innej osoby.
+                </div>
+                <div id="active-clients-list" class="grid grid-cols-1 gap-4 overflow-y-auto max-h-[600px] pr-2">
+                    <p class="text-sm text-slate-500 italic">Ładowanie bazy klientów...</p>
                 </div>
             </section>
 
@@ -180,50 +196,6 @@
         let allMessagesAdminData = [];
         let currentEditMessageId = null;
         let currentEditImageUrl = "";
-
-        // --- WNIOSKI ---
-        function renderPendingUsersSection() {
-            const pendingListContainer = document.getElementById('pending-users-list');
-            pendingListContainer.innerHTML = '';
-            
-            if(pendingUsersGlobalList.length === 0) {
-                pendingListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak nowych wniosków</div>`; return;
-            }
-
-            pendingUsersGlobalList.forEach((user) => {
-                const card = document.createElement('div');
-                card.className = "border-2 border-slate-100 p-5 rounded-2xl space-y-3 bg-slate-50 shadow-sm text-slate-900";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start"><strong class="text-blue-900 font-black text-base">${user.companyName}</strong><span class="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded border">NIP: ${user.nip}</span></div>
-                    <p class="text-xs font-semibold text-slate-600">${user.email} | Tel: ${user.phone}</p>
-                    <div class="pt-1">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna z bazy Firebase (np. handlowiec1):</label>
-                        <input type="text" id="input-manager-${user.id}" placeholder="Wpisz ID dokumentu opiekuna" class="w-full border-2 border-slate-200 rounded-xl p-2.5 bg-white font-bold text-xs text-blue-950 outline-none focus:border-red-600">
-                    </div>
-                    <div class="flex space-x-3 pt-2 border-t border-slate-200">
-                        <button onclick="approveUserWithManager('${user.id}', '${user.email}')" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-black uppercase shadow-sm cursor-pointer"><i class="fa-solid fa-check mr-1"></i>Akceptuj</button>
-                        <button onclick="rejectUser('${user.id}')" class="flex-1 bg-white border border-red-200 text-red-600 py-2 rounded-lg text-xs font-black uppercase cursor-pointer"><i class="fa-solid fa-xmark mr-1"></i>Odrzuć</button>
-                    </div>`;
-                pendingListContainer.appendChild(card);
-            });
-        }
-
-        onSnapshot(query(collection(db, "users"), where("status", "==", "pending")), (snapshot) => {
-            pendingUsersGlobalList = []; snapshot.forEach((docSnap) => { pendingUsersGlobalList.push({ id: docSnap.id, ...docSnap.data() }); });
-            renderPendingUsersSection();
-        });
-
-        window.approveUserWithManager = async function(docId, email) {
-            const selectedManagerId = document.getElementById(`input-manager-${docId}`).value.trim();
-            if(!selectedManagerId) { alert("Błąd: Musisz podać ID opiekuna przed akceptacją!"); return; }
-            const pin = Math.floor(100000 + Math.random() * 900000).toString();
-            await updateDoc(doc(db, "users", docId), { status: 'approved', pin: pin, managerId: selectedManagerId });
-            const subject = encodeURIComponent("Dostęp do platformy Instalbud B2B - Twój Kod PIN");
-            const body = encodeURIComponent(`Dzień dobry,\n\nTwój wniosek o dostęp do platformy B2B został pomyślnie zweryfikowany.\n\nTwój indywidualny kod PIN do aktywacji konta to: ${pin}\n\nPozdrawiamy,\nZespół Instalbud`);
-            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-        };
-
-        window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) { await deleteDoc(doc(db, "users", docId)); } };
 
         // --- ZAKŁADKI ---
         getDoc(settingsRef).then((docSnap) => {
@@ -446,6 +418,115 @@
                 } catch (e) {
                     alert("Błąd podczas usuwania: " + e.message);
                 }
+            }
+        };
+
+        // --- WNIOSKI OCZEKUJĄCE ---
+        function renderPendingUsersSection() {
+            const pendingListContainer = document.getElementById('pending-users-list');
+            pendingListContainer.innerHTML = '';
+            
+            if(pendingUsersGlobalList.length === 0) {
+                pendingListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak nowych wniosków</div>`; return;
+            }
+
+            pendingUsersGlobalList.forEach((user) => {
+                const card = document.createElement('div');
+                card.className = "border-2 border-slate-100 p-5 rounded-2xl space-y-3 bg-slate-50 shadow-sm text-slate-900";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start"><strong class="text-blue-900 font-black text-base">${user.companyName}</strong><span class="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded border">NIP: ${user.nip}</span></div>
+                    <p class="text-xs font-semibold text-slate-600">${user.email} | Tel: ${user.phone}</p>
+                    <div class="pt-1">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna z bazy Firebase (np. handlowiec1):</label>
+                        <input type="text" id="input-manager-${user.id}" placeholder="Wpisz ID dokumentu opiekuna" class="w-full border-2 border-slate-200 rounded-xl p-2.5 bg-white font-bold text-xs text-blue-950 outline-none focus:border-red-600">
+                    </div>
+                    <div class="flex space-x-3 pt-2 border-t border-slate-200">
+                        <button onclick="approveUserWithManager('${user.id}', '${user.email}')" class="flex-1 bg-green-600 text-white py-2 rounded-lg text-xs font-black uppercase shadow-sm cursor-pointer hover:bg-green-700 transition-colors"><i class="fa-solid fa-check mr-1"></i>Akceptuj</button>
+                        <button onclick="rejectUser('${user.id}')" class="flex-1 bg-white border border-red-200 text-red-600 py-2 rounded-lg text-xs font-black uppercase cursor-pointer hover:bg-red-50 transition-colors"><i class="fa-solid fa-xmark mr-1"></i>Odrzuć</button>
+                    </div>`;
+                pendingListContainer.appendChild(card);
+            });
+        }
+
+        onSnapshot(query(collection(db, "users"), where("status", "==", "pending")), (snapshot) => {
+            pendingUsersGlobalList = []; snapshot.forEach((docSnap) => { pendingUsersGlobalList.push({ id: docSnap.id, ...docSnap.data() }); });
+            renderPendingUsersSection();
+        });
+
+        window.approveUserWithManager = async function(docId, email) {
+            const selectedManagerId = document.getElementById(`input-manager-${docId}`).value.trim();
+            if(!selectedManagerId) { alert("Błąd: Musisz podać ID opiekuna przed akceptacją!"); return; }
+            const pin = Math.floor(100000 + Math.random() * 900000).toString();
+            await updateDoc(doc(db, "users", docId), { status: 'approved', pin: pin, managerId: selectedManagerId });
+            const subject = encodeURIComponent("Dostęp do platformy Instalbud B2B - Twój Kod PIN");
+            const body = encodeURIComponent(`Dzień dobry,\n\nTwój wniosek o dostęp do platformy B2B został pomyślnie zweryfikowany.\n\nTwój indywidualny kod PIN do aktywacji konta to: ${pin}\n\nPozdrawiamy,\nZespół Instalbud`);
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        };
+
+        window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) { await deleteDoc(doc(db, "users", docId)); } };
+
+        // --- NOWY MODUŁ: ZARZĄDZANIE KONTAMI KLIENTÓW (CRM) ---
+        onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
+            const clientsListContainer = document.getElementById('active-clients-list');
+            clientsListContainer.innerHTML = '';
+            
+            if(snapshot.empty) {
+                clientsListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak zarejestrowanych klientów.</div>`;
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const user = docSnap.data();
+                const id = docSnap.id;
+                
+                const card = document.createElement('div');
+                card.className = "border-2 border-slate-200 p-5 rounded-2xl bg-white shadow-sm hover:shadow-md transition";
+                
+                card.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Nazwa Firmy</label>
+                            <input type="text" id="edit-name-${id}" value="${user.companyName || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm font-bold bg-slate-50 focus:border-red-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">NIP</label>
+                            <input type="text" id="edit-nip-${id}" value="${user.nip || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">E-mail</label>
+                            <input type="email" id="edit-email-${id}" value="${user.email || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Telefon</label>
+                            <input type="text" id="edit-phone-${id}" value="${user.phone || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna Handlowego (z bazy Firebase)</label>
+                            <input type="text" id="edit-manager-${id}" value="${user.managerId || ''}" class="w-full border-2 border-blue-200 focus:border-blue-600 outline-none p-2 rounded-lg text-sm font-bold bg-blue-50">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="updateClient('${id}')" class="bg-blue-900 hover:bg-blue-800 text-white font-black py-2 px-6 rounded-xl text-xs uppercase shadow-md transition-colors cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk mr-2"></i> Zapisz Zmiany
+                        </button>
+                    </div>
+                `;
+                clientsListContainer.appendChild(card);
+            });
+        });
+
+        window.updateClient = async function(docId) {
+            try {
+                await updateDoc(doc(db, "users", docId), {
+                    companyName: document.getElementById(`edit-name-${docId}`).value.trim(),
+                    nip: document.getElementById(`edit-nip-${docId}`).value.trim(),
+                    email: document.getElementById(`edit-email-${docId}`).value.trim(),
+                    phone: document.getElementById(`edit-phone-${docId}`).value.trim(),
+                    managerId: document.getElementById(`edit-manager-${docId}`).value.trim()
+                });
+                alert("Dane klienta zostały zaktualizowane pomyślnie.");
+            } catch (e) {
+                alert("Błąd podczas aktualizacji: " + e.message);
             }
         };
 

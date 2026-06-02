@@ -30,6 +30,7 @@
         <button id="btn-install" class="bg-red-600 text-white font-bold py-2 px-4 rounded-xl text-xs cursor-pointer">INSTALUJ</button>
     </div>
 
+    <!-- EKRAN LOGOWANIA -->
     <div id="screen-login" class="flex flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <div class="flex justify-center mb-6 bg-blue-950 p-5 rounded-2xl shadow-inner border border-blue-800">
@@ -49,6 +50,7 @@
         </div>
     </div>
 
+    <!-- EKRAN REJESTRACJI -->
     <div id="screen-register" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <h1 class="text-2xl font-black text-blue-900 mb-6 text-center uppercase tracking-tighter">Wniosek o dostęp</h1>
@@ -64,6 +66,7 @@
         </div>
     </div>
 
+    <!-- EKRAN AKTYWACJI -->
     <div id="screen-activation" class="hidden flex-col items-center justify-center min-h-screen p-6 bg-blue-900">
         <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md border-b-8 border-red-600">
             <h1 class="text-2xl font-black text-blue-900 mb-4 text-center uppercase tracking-tighter">Aktywacja Konta</h1>
@@ -78,6 +81,7 @@
         </div>
     </div>
 
+    <!-- GŁÓWNA APLIKACJA -->
     <div id="screen-app" class="hidden">
         <header class="bg-blue-900 text-white p-5 shadow-xl sticky top-0 z-50 flex justify-between items-center border-b-4 border-red-600">
             <div class="flex items-center space-x-2">
@@ -113,6 +117,7 @@
         </main>
     </div>
 
+    <!-- ZAPYTANIE OFERTOWE -->
     <div id="screen-contact" class="hidden flex-col min-h-screen bg-slate-50 safe-width">
         <header class="bg-blue-900 text-white p-5 flex items-center space-x-4 border-b-4 border-red-600 relative z-50">
             <button onclick="showScreen('screen-app')" class="p-2 bg-blue-800 rounded-xl cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
@@ -124,8 +129,8 @@
                 <h2 id="manager-name" class="text-xl font-black text-blue-900">Biuro Obsługi Klienta</h2>
                 <p class="text-xs text-slate-400 font-bold uppercase mb-4">Twój Dedykowany Opiekun</p>
                 <div class="flex justify-center space-x-3 mt-4">
-                    <a id="manager-phone-link" href="tel:+48663 489 221" class="bg-green-500 text-white py-3 px-4 rounded-xl font-bold text-sm">Zadzwoń</a>
-                    <a id="manager-email-link" href="mailto:kamil.grabowski@instalbud.pl" class="bg-blue-600 text-white py-3 px-4 rounded-xl font-bold text-sm">E-mail</a>
+                    <a id="manager-phone-link" href="tel:+48123456789" class="bg-green-500 text-white py-3 px-4 rounded-xl font-bold text-sm">Zadzwoń</a>
+                    <a id="manager-email-link" href="mailto:biuro@instalbud.pl" class="bg-blue-600 text-white py-3 px-4 rounded-xl font-bold text-sm">E-mail</a>
                 </div>
             </div>
             <form id="form-inquiry" class="bg-white p-6 rounded-2xl shadow-md space-y-4">
@@ -149,6 +154,7 @@
         </main>
     </div>
 
+    <!-- MENU DOLNE -->
     <nav class="bg-white border-t-2 flex justify-around py-3 shadow-2xl px-2 pb-safe">
         <button onclick="switchTab('module-komunikaty', this)" class="nav-btn text-blue-900 flex flex-col items-center flex-1 active-tab cursor-pointer">
             <i class="fa-solid fa-bullhorn text-2xl mb-0.5"></i>
@@ -174,6 +180,7 @@
         </button>
     </nav>
 
+    <!-- OKNO MODALNE WIADOMOŚCI Z PRZYCISKIEM KALENDARZA -->
     <div id="message-modal" class="fixed inset-0 bg-slate-900/60 z-[10000] hidden items-center justify-center p-4 screen-transition">
         <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[80vh] relative border-t-8 border-blue-900 flex flex-col">
             <div class="flex justify-between items-center mb-5">
@@ -185,9 +192,15 @@
             <img id="modal-image" src="" alt="Obraz wiadomości" class="hidden w-full h-auto rounded-xl mb-4 shadow border border-slate-100">
             <h2 id="modal-title" class="text-xl font-black text-blue-900 mb-3 uppercase tracking-tight"></h2>
             <p id="modal-body" class="text-slate-700 text-base leading-relaxed whitespace-pre-line font-medium mb-4"></p>
+            
+            <!-- PRZYCISK KALENDARZA (WIDOCZNY TYLKO DLA WYDARZEŃ) -->
+            <a id="modal-calendar-btn" target="_blank" class="hidden mt-4 bg-blue-600 text-white font-black py-4 px-4 rounded-xl text-center text-sm uppercase cursor-pointer items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <i class="fa-regular fa-calendar-plus mr-2 text-lg"></i> Dodaj do kalendarza
+            </a>
         </div>
     </div>
 
+    <!-- MODAL DANYCH KONTA -->
     <div id="user-modal" class="fixed inset-0 bg-slate-900/60 z-[10000] hidden items-center justify-center p-4 screen-transition">
         <div class="bg-white w-full max-w-sm rounded-3xl p-7 shadow-2xl relative border-t-8 border-red-600 flex flex-col items-center">
             <button onclick="closeUserModal()" class="absolute top-4 right-4 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-blue-900 active:bg-red-100 cursor-pointer">
@@ -245,7 +258,6 @@
         let allMessagesData = [];
         let limitDays = 30; 
 
-        // --- NAPRAWIONA REJESTRACJA ---
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             const status = document.getElementById('reg-status');
@@ -274,7 +286,6 @@
             }
         });
 
-        // --- NAPRAWIONA AKTYWACJA ---
         document.getElementById('form-activation').addEventListener('submit', async (e) => {
             e.preventDefault();
             const status = document.getElementById('act-status');
@@ -351,7 +362,7 @@
                 card.innerHTML = `
                     <h3 class="font-black text-lg text-blue-900 leading-tight uppercase mb-2 clamp-3">${msg.title}</h3>
                     <p class="text-sm text-slate-600 line-clamp-2">${msg.preview}</p>
-                    <div class="text-[9px] font-black text-slate-400 mt-3 uppercase">${msg.date}</div>
+                    <div class="text-[9px] font-black text-slate-400 mt-3 uppercase">${msg.date} ${msg.isEvent ? '| <i class="fa-regular fa-calendar-check text-blue-600"></i> WYDARZENIE' : ''}</div>
                 `;
                 const container = document.getElementById(`module-${msg.category}`);
                 if(container) container.appendChild(card);
@@ -377,8 +388,27 @@
             document.getElementById('modal-title').innerText = msg.title;
             document.getElementById('modal-date').innerText = msg.date;
             document.getElementById('modal-body').innerText = msg.body;
+            
             const modalImg = document.getElementById('modal-image');
             if (msg.imageUrl) { modalImg.src = msg.imageUrl; modalImg.classList.remove('hidden'); } else { modalImg.src = ""; modalImg.classList.add('hidden'); }
+            
+            // LOGIKA PRZYCISKU KALENDARZA
+            const calBtn = document.getElementById('modal-calendar-btn');
+            if(msg.isEvent && msg.eventStart && msg.eventEnd) {
+                // Konwersja dat lokalnych na format UTC (wymagany przez Google Calendar)
+                const startFormat = new Date(msg.eventStart).toISOString().replace(/-|:|\.\d\d\d/g,"");
+                const endFormat = new Date(msg.eventEnd).toISOString().replace(/-|:|\.\d\d\d/g,"");
+                const title = encodeURIComponent(msg.title);
+                const details = encodeURIComponent(msg.body);
+                const loc = encodeURIComponent(msg.eventLocation || "");
+                calBtn.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${loc}&dates=${startFormat}/${endFormat}`;
+                calBtn.classList.remove('hidden');
+                calBtn.classList.add('flex');
+            } else {
+                calBtn.classList.add('hidden');
+                calBtn.classList.remove('flex');
+            }
+
             const modal = document.getElementById('message-modal');
             modal.classList.remove('hidden'); modal.classList.add('flex');
         }

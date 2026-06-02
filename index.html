@@ -180,7 +180,7 @@
         </button>
     </nav>
 
-    <!-- OKNO MODALNE WIADOMOŚCI Z PRZYCISKIEM KALENDARZA -->
+    <!-- OKNO MODALNE WIADOMOŚCI Z PRZYCISKAMI AKCJI -->
     <div id="message-modal" class="fixed inset-0 bg-slate-900/60 z-[10000] hidden items-center justify-center p-4 screen-transition">
         <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl overflow-y-auto max-h-[80vh] relative border-t-8 border-blue-900 flex flex-col">
             <div class="flex justify-between items-center mb-5">
@@ -193,9 +193,14 @@
             <h2 id="modal-title" class="text-xl font-black text-blue-900 mb-3 uppercase tracking-tight"></h2>
             <p id="modal-body" class="text-slate-700 text-base leading-relaxed whitespace-pre-line font-medium mb-4"></p>
             
-            <!-- PRZYCISK KALENDARZA (WIDOCZNY TYLKO DLA WYDARZEŃ) -->
-            <a id="modal-calendar-btn" target="_blank" class="hidden mt-4 bg-blue-600 text-white font-black py-4 px-4 rounded-xl text-center text-sm uppercase cursor-pointer items-center justify-center shadow-lg active:scale-95 transition-transform">
+            <!-- PRZYCISK KALENDARZA -->
+            <a id="modal-calendar-btn" target="_blank" class="hidden mt-2 bg-blue-600 text-white font-black py-4 px-4 rounded-xl text-center text-sm uppercase cursor-pointer items-center justify-center shadow-lg active:scale-95 transition-transform">
                 <i class="fa-regular fa-calendar-plus mr-2 text-lg"></i> Dodaj do kalendarza
+            </a>
+
+            <!-- PRZYCISK LINKU ZEWNĘTRZNEGO -->
+            <a id="modal-external-link-btn" target="_blank" class="hidden mt-2 bg-green-600 text-white font-black py-4 px-4 rounded-xl text-center text-sm uppercase cursor-pointer items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2 text-lg"></i> Przejdź na stronę
             </a>
         </div>
     </div>
@@ -359,10 +364,14 @@
                 card.className = `p-5 rounded-2xl shadow-md border-l-8 cursor-pointer transition-all ${isRead ? 'bg-white border-slate-200 opacity-75' : 'bg-white border-blue-900 unread-glow text-slate-900'}`;
                 card.onclick = () => openModal(msg);
                 
+                let extraBadges = "";
+                if (msg.isEvent) extraBadges += ' | <i class="fa-regular fa-calendar-check text-blue-600"></i> WYDARZENIE';
+                if (msg.hasLink) extraBadges += ' | <i class="fa-solid fa-link text-green-600"></i> LINK';
+
                 card.innerHTML = `
                     <h3 class="font-black text-lg text-blue-900 leading-tight uppercase mb-2 clamp-3">${msg.title}</h3>
                     <p class="text-sm text-slate-600 line-clamp-2">${msg.preview}</p>
-                    <div class="text-[9px] font-black text-slate-400 mt-3 uppercase">${msg.date} ${msg.isEvent ? '| <i class="fa-regular fa-calendar-check text-blue-600"></i> WYDARZENIE' : ''}</div>
+                    <div class="text-[9px] font-black text-slate-400 mt-3 uppercase">${msg.date} ${extraBadges}</div>
                 `;
                 const container = document.getElementById(`module-${msg.category}`);
                 if(container) container.appendChild(card);
@@ -392,10 +401,9 @@
             const modalImg = document.getElementById('modal-image');
             if (msg.imageUrl) { modalImg.src = msg.imageUrl; modalImg.classList.remove('hidden'); } else { modalImg.src = ""; modalImg.classList.add('hidden'); }
             
-            // LOGIKA PRZYCISKU KALENDARZA
+            // LOGIKA KALENDARZA
             const calBtn = document.getElementById('modal-calendar-btn');
             if(msg.isEvent && msg.eventStart && msg.eventEnd) {
-                // Konwersja dat lokalnych na format UTC (wymagany przez Google Calendar)
                 const startFormat = new Date(msg.eventStart).toISOString().replace(/-|:|\.\d\d\d/g,"");
                 const endFormat = new Date(msg.eventEnd).toISOString().replace(/-|:|\.\d\d\d/g,"");
                 const title = encodeURIComponent(msg.title);
@@ -407,6 +415,19 @@
             } else {
                 calBtn.classList.add('hidden');
                 calBtn.classList.remove('flex');
+            }
+
+            // LOGIKA LINKU ZEWNĘTRZNEGO
+            const extBtn = document.getElementById('modal-external-link-btn');
+            if(msg.hasLink && msg.linkUrl) {
+                let safeUrl = msg.linkUrl;
+                if(!safeUrl.startsWith('http')) safeUrl = 'https://' + safeUrl;
+                extBtn.href = safeUrl;
+                extBtn.classList.remove('hidden');
+                extBtn.classList.add('flex');
+            } else {
+                extBtn.classList.add('hidden');
+                extBtn.classList.remove('flex');
             }
 
             const modal = document.getElementById('message-modal');

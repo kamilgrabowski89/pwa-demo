@@ -86,6 +86,7 @@
                         <textarea id="msg-body" rows="4" required class="w-full border-2 border-slate-200 rounded-xl p-4 bg-slate-50 outline-none focus:border-red-600 text-sm"></textarea>
                     </div>
                     
+                    <!-- SEKCJA OPCJI WYDARZENIA (KALENDARZ) -->
                     <div class="border-2 border-blue-100 p-4 rounded-xl bg-blue-50 mt-4">
                         <label class="flex items-center space-x-2 cursor-pointer">
                             <input type="checkbox" id="msg-is-event" class="w-5 h-5 accent-blue-600 cursor-pointer">
@@ -109,7 +110,21 @@
                         </div>
                     </div>
 
-                    <div class="flex space-x-3">
+                    <!-- NOWA SEKCJA OPCJI LINKU ZEWNĘTRZNEGO -->
+                    <div class="border-2 border-green-100 p-4 rounded-xl bg-green-50 mt-4">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="msg-has-link" class="w-5 h-5 accent-green-600 cursor-pointer">
+                            <span class="text-xs font-black text-green-900 uppercase">Dodaj zewnętrzny link / Przycisk akcji</span>
+                        </label>
+                        <div id="link-fields" class="hidden mt-4 space-y-3 border-t border-green-200 pt-3">
+                            <div>
+                                <label class="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Adres URL (np. strona producenta, artykuł)</label>
+                                <input type="url" id="msg-link-url" placeholder="https://www..." class="w-full border-2 border-slate-200 rounded-xl p-2 bg-white outline-none text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 mt-5">
                         <button type="submit" id="btn-message-send" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-red-700 transition-colors">Opublikuj Komunikat</button>
                         <button type="button" id="btn-message-cancel" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-200 text-slate-700 font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-slate-300 transition-colors">Anuluj</button>
                     </div>
@@ -162,8 +177,6 @@
         const settingsRef = doc(db, "settings", "ui_config");
 
         let pendingUsersGlobalList = [];
-        
-        // Zmienne do logiki Edycji
         let allMessagesAdminData = [];
         let currentEditMessageId = null;
         let currentEditImageUrl = "";
@@ -234,13 +247,18 @@
             } catch (e) { btn.disabled = false; }
         });
 
-        // --- OBSŁUGA WYDARZEŃ UI ---
+        // --- OBSŁUGA WYDARZEŃ UI (KALENDARZ & LINK) ---
         document.getElementById('msg-is-event').addEventListener('change', function() {
             const eventFields = document.getElementById('event-fields');
             if(this.checked) eventFields.classList.remove('hidden');
             else eventFields.classList.add('hidden');
         });
-
+        
+        document.getElementById('msg-has-link').addEventListener('change', function() {
+            const linkFields = document.getElementById('link-fields');
+            if(this.checked) linkFields.classList.remove('hidden');
+            else linkFields.classList.add('hidden');
+        });
 
         // --- LOGIKA FORMULARZA KOMUNIKATU (TWORZENIE I EDYCJA) ---
         document.getElementById('form-new-message').addEventListener('submit', async (e) => {
@@ -249,6 +267,7 @@
             const status = document.getElementById('msg-status');
             const file = document.getElementById('msg-image').files[0];
             
+            // Pobieranie wartości Kalendarza
             const isEvent = document.getElementById('msg-is-event').checked;
             const eventStart = document.getElementById('msg-event-start').value;
             const eventEnd = document.getElementById('msg-event-end').value;
@@ -258,13 +277,22 @@
                 alert("Jeśli to wydarzenie, musisz podać datę startu i końca!");
                 return;
             }
+            
+            // Pobieranie wartości Linku
+            const hasLink = document.getElementById('msg-has-link').checked;
+            const linkUrl = document.getElementById('msg-link-url').value.trim();
+            
+            if (hasLink && !linkUrl) {
+                alert("Jeśli chcesz dodać link zewnętrzny, musisz wypełnić adres URL!");
+                return;
+            }
 
             btn.disabled = true; 
             status.innerText = currentEditMessageId ? "Zapisywanie zmian..." : "Publikowanie..."; 
             status.className = "text-xs text-center font-bold mt-2 text-blue-900 animate-pulse"; 
             status.classList.remove('hidden');
             
-            let imageUrl = currentEditImageUrl; // Zostaw stary link, jeśli nie wybrano nowego zdjęcia
+            let imageUrl = currentEditImageUrl;
 
             try {
                 if (file) {
@@ -282,15 +310,15 @@
                     isEvent: isEvent,
                     eventStart: isEvent ? eventStart : null,
                     eventEnd: isEvent ? eventEnd : null,
-                    eventLocation: isEvent ? eventLoc : null
+                    eventLocation: isEvent ? eventLoc : null,
+                    hasLink: hasLink,
+                    linkUrl: hasLink ? linkUrl : null
                 };
 
                 if (currentEditMessageId) {
-                    // Tryb edycji: Aktualizacja istniejącego dokumentu
                     await updateDoc(doc(db, "messages", currentEditMessageId), msgData);
                     status.innerText = "Zmiany zostały pomyślnie zapisane!";
                 } else {
-                    // Tryb tworzenia: Nowy wpis
                     msgData.date = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
                     msgData.createdAt = new Date();
                     await addDoc(collection(db, "messages"), msgData);
@@ -299,11 +327,10 @@
                 
                 status.className = "text-xs text-center font-bold mt-2 text-green-600 bg-green-50 p-2 rounded-lg"; 
                 
-                // Zresetuj formularz całkowicie po sukcesie
                 setTimeout(() => { 
                     status.classList.add('hidden'); 
                     btn.disabled = false;
-                    cancelEdit(); // wraca do trybu "Tworzenia"
+                    cancelEdit();
                 }, 2000);
             } catch (error) { 
                 status.innerText = "Wystąpił błąd podczas zapisywania."; 
@@ -312,7 +339,7 @@
             }
         });
 
-        // --- LISTA OPUBLIKOWANYCH KOMUNIKATÓW (Z PRZYCISKIEM EDYCJI) ---
+        // --- LISTA OPUBLIKOWANYCH KOMUNIKATÓW ---
         onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
             allMessagesAdminData = [];
             const messagesListContainer = document.getElementById('published-messages-list');
@@ -326,19 +353,20 @@
             snapshot.forEach((docSnap) => {
                 const msg = docSnap.data();
                 const id = docSnap.id;
-                allMessagesAdminData.push({ id: id, ...msg }); // Zapisz do pamięci dla trybu edycji
+                allMessagesAdminData.push({ id: id, ...msg });
                 
                 const card = document.createElement('div');
                 card.className = "border-2 border-slate-100 p-4 rounded-xl flex justify-between items-center bg-slate-50 shadow-sm transition hover:shadow-md";
                 
                 let eventBadge = msg.isEvent ? `<span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded ml-2 uppercase"><i class="fa-solid fa-calendar mr-1"></i> Wydarzenie</span>` : '';
+                let linkBadge = msg.hasLink ? `<span class="bg-green-100 text-green-800 text-[9px] font-black px-2 py-0.5 rounded ml-1 uppercase"><i class="fa-solid fa-link mr-1"></i> Link</span>` : '';
                 
                 card.innerHTML = `
                     <div class="flex-1 pr-4 truncate">
                         <div class="flex items-center mb-1">
                             <span class="text-[9px] font-black text-slate-500 uppercase bg-white px-2 py-0.5 rounded border mr-2">${msg.category}</span>
                             <span class="text-xs font-bold text-slate-400">${msg.date}</span>
-                            ${eventBadge}
+                            ${eventBadge} ${linkBadge}
                         </div>
                         <h3 class="font-bold text-blue-900 text-sm truncate" title="${msg.title}">${msg.title}</h3>
                     </div>
@@ -360,38 +388,39 @@
             const msg = allMessagesAdminData.find(m => m.id === docId);
             if(!msg) return;
 
-            // Ustaw flagi
             currentEditMessageId = docId;
             currentEditImageUrl = msg.imageUrl || "";
 
-            // Wypełnij formularz danymi
             document.getElementById('msg-category').value = msg.category || "komunikaty";
             document.getElementById('msg-title').value = msg.title || "";
             document.getElementById('msg-preview').value = msg.preview || "";
             document.getElementById('msg-body').value = msg.body || "";
             
-            // Obsługa wydarzenia
+            // Obsługa Wydarzenia (Kalendarz)
             const isEv = msg.isEvent || false;
-            const checkboxEvent = document.getElementById('msg-is-event');
-            checkboxEvent.checked = isEv;
+            document.getElementById('msg-is-event').checked = isEv;
             document.getElementById('event-fields').classList.toggle('hidden', !isEv);
             document.getElementById('msg-event-start').value = msg.eventStart || "";
             document.getElementById('msg-event-end').value = msg.eventEnd || "";
             document.getElementById('msg-event-location').value = msg.eventLocation || "";
+            
+            // Obsługa Zewnętrznego Linku
+            const isLnk = msg.hasLink || false;
+            document.getElementById('msg-has-link').checked = isLnk;
+            document.getElementById('link-fields').classList.toggle('hidden', !isLnk);
+            document.getElementById('msg-link-url').value = msg.linkUrl || "";
 
-            // Przestawienie interfejsu w tryb EDYCJI
+            // Przestawienie interfejsu
             document.getElementById('form-msg-title-header').innerText = "Edytuj Opublikowany Komunikat";
             document.getElementById('btn-message-send').innerText = "Zapisz Zmiany";
             document.getElementById('btn-message-cancel').classList.remove('hidden');
             
-            // Informacja o grafice
             if(currentEditImageUrl !== "") {
                 document.getElementById('edit-image-info').classList.remove('hidden');
             } else {
                 document.getElementById('edit-image-info').classList.add('hidden');
             }
 
-            // Płynne przewinięcie do formularza
             window.scrollTo({ top: document.getElementById('message-form-section').offsetTop - 30, behavior: 'smooth' });
         };
 
@@ -400,8 +429,8 @@
             currentEditImageUrl = "";
             document.getElementById('form-new-message').reset();
             
-            // Powrót interfejsu do trybu TWORZENIA
             document.getElementById('event-fields').classList.add('hidden');
+            document.getElementById('link-fields').classList.add('hidden');
             document.getElementById('edit-image-info').classList.add('hidden');
             document.getElementById('form-msg-title-header').innerText = "Opublikuj Komunikat / Promocję";
             document.getElementById('btn-message-send').innerText = "Opublikuj Komunikat";
@@ -412,7 +441,7 @@
             if(confirm("Czy na pewno chcesz bezpowrotnie usunąć ten komunikat? Zniknie on natychmiast u wszystkich klientów.")) {
                 try {
                     await deleteDoc(doc(db, "messages", docId));
-                    if(currentEditMessageId === docId) cancelEdit(); // Zresetuj formularz, jeśli usunięto właśnie edytowany wpis
+                    if(currentEditMessageId === docId) cancelEdit();
                 } catch (e) {
                     alert("Błąd podczas usuwania: " + e.message);
                 }

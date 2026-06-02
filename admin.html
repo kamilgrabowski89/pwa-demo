@@ -172,14 +172,23 @@
             </section>
             
             <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col md:col-span-2">
-                <div class="flex items-center space-x-3 mb-6">
-                    <i class="fa-solid fa-address-book text-2xl text-blue-900"></i>
-                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Konta Klientów (Baza CRM)</h2>
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-address-book text-2xl text-blue-900"></i>
+                        <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Konta Klientów (Baza CRM)</h2>
+                    </div>
+                    
+                    <div class="relative w-full md:w-1/2">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-900"></i>
+                        <input type="text" id="search-client" placeholder="Wyszukaj firmę lub NIP..." class="w-full pl-11 pr-4 py-3 bg-blue-50 border-2 border-blue-100 rounded-xl text-sm font-bold text-blue-900 focus:border-blue-600 outline-none transition-colors placeholder:text-blue-300">
+                    </div>
                 </div>
+                
                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs text-blue-900 mb-4 font-medium">
-                    Edytuj dane zaakceptowanych klientów oraz zmieniaj ich przypisanych opiekunów. Zmiana ID opiekuna natychmiast przekieruje nowe zapytania ofertowe do innej osoby.
+                    Edytuj dane zaakceptowanych klientów oraz zmieniaj ich przypisanych opiekunów. <b>Kliknij w dany wiersz na liście, aby rozwinąć panel edycji.</b>
                 </div>
-                <div id="active-clients-list" class="grid grid-cols-1 gap-4 overflow-y-auto max-h-[600px] pr-2">
+                
+                <div id="active-clients-list" class="flex flex-col space-y-3 overflow-y-auto max-h-[600px] pr-2">
                     <p class="text-sm text-slate-500 italic">Ładowanie bazy klientów...</p>
                 </div>
             </section>
@@ -219,6 +228,9 @@
         let allMessagesAdminData = [];
         let currentEditMessageId = null;
         let currentEditImageUrl = "";
+        
+        // Zmienna przechowująca wszystkich klientów dla wyszukiwarki
+        let allActiveClientsData = []; 
 
         // --- ZAKŁADKI ---
         getDoc(settingsRef).then((docSnap) => {
@@ -497,52 +509,108 @@
 
         window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) await deleteDoc(doc(db, "users", docId)); };
 
-        // --- ZARZĄDZANIE KONTAMI KLIENTÓW (CRM) ---
-        onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
+
+        // --- NOWE ZARZĄDZANIE KONTAMI KLIENTÓW (ZWIJANA LISTA + WYSZUKIWARKA) ---
+        
+        // Podpięcie wyszukiwarki do pola input
+        document.getElementById('search-client').addEventListener('input', renderActiveClients);
+        
+        function renderActiveClients() {
             const clientsListContainer = document.getElementById('active-clients-list');
+            const searchTerm = document.getElementById('search-client').value.toLowerCase();
             clientsListContainer.innerHTML = '';
             
-            if(snapshot.empty) {
-                clientsListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak zarejestrowanych klientów.</div>`; return;
+            // Filtrowanie bazy po wpisanej frazie
+            const filteredClients = allActiveClientsData.filter(user => {
+                const name = (user.companyName || '').toLowerCase();
+                const nip = (user.nip || '').toLowerCase();
+                return name.includes(searchTerm) || nip.includes(searchTerm);
+            });
+
+            if(filteredClients.length === 0) {
+                clientsListContainer.innerHTML = `<div class="bg-white border-2 border-dashed border-blue-200 p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak wyników wyszukiwania dla "${searchTerm}".</div>`; 
+                return;
             }
 
-            snapshot.forEach((docSnap) => {
-                const user = docSnap.data();
-                const id = docSnap.id;
-                
+            filteredClients.forEach((user) => {
+                const id = user.id;
                 const card = document.createElement('div');
-                card.className = "border-2 border-slate-200 p-5 rounded-2xl bg-white shadow-sm hover:shadow-md transition";
+                card.className = "border-2 border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden transition-all";
+                
                 card.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Nazwa Firmy</label>
-                            <input type="text" id="edit-name-${id}" value="${user.companyName || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm font-bold bg-slate-50 focus:border-red-600 outline-none">
+                    <div onclick="toggleClientDetails('${id}')" class="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-100 text-blue-900 rounded-lg flex items-center justify-center font-black mr-3 shadow-inner">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <div>
+                                <strong class="text-blue-900 font-black text-sm uppercase block md:inline">${user.companyName || 'Brak nazwy'}</strong>
+                                <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border mt-1 md:mt-0 md:ml-2 inline-block">NIP: ${user.nip || 'Brak'}</span>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">NIP</label>
-                            <input type="text" id="edit-nip-${id}" value="${user.nip || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">E-mail</label>
-                            <input type="email" id="edit-email-${id}" value="${user.email || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Telefon</label>
-                            <input type="text" id="edit-phone-${id}" value="${user.phone || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna (z bazy Firebase)</label>
-                            <input type="text" id="edit-manager-${id}" value="${user.managerId || ''}" class="w-full border-2 border-blue-200 focus:border-blue-600 outline-none p-2 rounded-lg text-sm font-bold bg-blue-50">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase hidden md:block">${user.email}</span>
+                            <div class="w-8 h-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center">
+                                <i id="icon-client-${id}" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4 flex justify-end">
-                        <button onclick="updateClient('${id}')" class="bg-blue-900 hover:bg-blue-800 text-white font-black py-2 px-6 rounded-xl text-xs uppercase shadow-md transition-colors cursor-pointer">
-                            <i class="fa-solid fa-floppy-disk mr-2"></i> Zapisz Zmiany
-                        </button>
+                    
+                    <div id="details-client-${id}" class="hidden border-t-2 border-slate-100 p-5 bg-slate-50/50">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Nazwa Firmy</label>
+                                <input type="text" id="edit-name-${id}" value="${user.companyName || ''}" class="w-full border-2 border-slate-200 p-2.5 rounded-lg text-sm font-bold bg-white focus:border-red-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">NIP</label>
+                                <input type="text" id="edit-nip-${id}" value="${user.nip || ''}" class="w-full border-2 border-slate-200 p-2.5 rounded-lg text-sm bg-white focus:border-red-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">E-mail</label>
+                                <input type="email" id="edit-email-${id}" value="${user.email || ''}" class="w-full border-2 border-slate-200 p-2.5 rounded-lg text-sm bg-white focus:border-red-600 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Telefon</label>
+                                <input type="text" id="edit-phone-${id}" value="${user.phone || ''}" class="w-full border-2 border-slate-200 p-2.5 rounded-lg text-sm bg-white focus:border-red-600 outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-black text-blue-900 uppercase tracking-wider mb-1">ID Opiekuna (z bazy Firebase)</label>
+                                <input type="text" id="edit-manager-${id}" value="${user.managerId || ''}" class="w-full border-2 border-blue-200 focus:border-blue-600 outline-none p-3 rounded-lg text-sm font-black text-blue-900 bg-white shadow-inner">
+                            </div>
+                        </div>
+                        <div class="mt-5 flex justify-end border-t border-slate-200 pt-4">
+                            <button onclick="updateClient('${id}')" class="bg-blue-900 hover:bg-blue-800 text-white font-black py-3 px-8 rounded-xl text-xs uppercase shadow-md transition-colors cursor-pointer">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i> Zapisz Zmiany
+                            </button>
+                        </div>
                     </div>
                 `;
                 clientsListContainer.appendChild(card);
             });
+        }
+
+        // Globalna funkcja rozwijająca/zwijająca panel klienta
+        window.toggleClientDetails = function(id) {
+            const details = document.getElementById(`details-client-${id}`);
+            const icon = document.getElementById(`icon-client-${id}`);
+            
+            if(details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                details.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        };
+
+        // Nasłuchiwanie zmian w bazie Firebase i inicjalizacja listy
+        onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
+            allActiveClientsData = [];
+            snapshot.forEach((docSnap) => {
+                allActiveClientsData.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            renderActiveClients();
         });
 
         window.updateClient = async function(docId) {

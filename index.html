@@ -381,7 +381,7 @@
         window.closeUserModal = () => { document.getElementById('user-modal').classList.add('hidden'); document.getElementById('user-modal').classList.remove('flex'); };
         window.logout = () => { localStorage.clear(); location.reload(); };
 
-        // --- ZAPYTANIE OFERTOWE Z EMAILJS ---
+       // --- ZAPYTANIE OFERTOWE Z EMAILJS ---
         const fileInput = document.getElementById('inq-file');
         const fileNameSpan = document.getElementById('file-name');
         
@@ -395,9 +395,15 @@
             const status = document.getElementById('inq-status');
             const btn = document.getElementById('btn-inquiry-send');
             const file = fileInput.files[0];
+            
+            // "ODKURZACZ" DANYCH - Bezwzględnie usuwamy spacje i czyścimy zmienne
             const inquiryBody = document.getElementById('inq-body').value.trim();
-            const compName = localStorage.getItem('companyName') || "Niezalogowany";
-            const compPhone = localStorage.getItem('userPhone') || "Brak";
+            const compName = (localStorage.getItem('companyName') || "Niezalogowany").trim();
+            const compPhone = (localStorage.getItem('userPhone') || "Brak").trim();
+            
+            // Usuwamy wszelkie ukryte spacje wewnątrz adresów e-mail!
+            const userEmail = (localStorage.getItem('userEmail') || "brak@danych.pl").replace(/\s/g, '');
+            const targetEmail = (window.currentManagerEmail || "kontakt@centralbud.nazwa.pl").replace(/\s/g, '');
             
             if(!mailServiceConfig || !mailServiceConfig.emailjsServiceId) {
                 alert("Błąd: Konfiguracja poczty EmailJS nie została znaleziona."); return;
@@ -414,16 +420,12 @@
                     uploadedFileUrl = await getDownloadURL(uploadSnap.ref);
                 }
                 
-                const targetEmail = window.currentManagerEmail || "kontakt@centralbud.nazwa.pl";
-                
-               // WYWOŁANIE EMAILJS
-                const userEmail = localStorage.getItem('userEmail') || "brak@danych.pl";
-                
+                // WYWOŁANIE EMAILJS
                 await emailjs.send(mailServiceConfig.emailjsServiceId, mailServiceConfig.emailjsTemplateId, {
                     to_email: targetEmail,
                     client_name: compName,
                     client_phone: compPhone,
-                    client_email: userEmail, // <-- Brakująca zmienna!
+                    client_email: userEmail,
                     message: inquiryBody,
                     attachment_link: uploadedFileUrl || "Brak załącznika"
                 });

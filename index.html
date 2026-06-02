@@ -442,7 +442,7 @@
             }
         });
 
-        // WZNOWIENIE SESJI (AUTOLOGOWANIE)
+// WZNOWIENIE SESJI (AUTOLOGOWANIE)
         const sid = localStorage.getItem('userDocId');
         if(sid) { 
             verifiedUserId = sid; showScreen('screen-app'); 
@@ -451,22 +451,42 @@
             document.getElementById('user-phone').innerText = localStorage.getItem('userPhone');
             window.currentManagerEmail = "kontakt@centralbud.nazwa.pl"; 
 
-            // Pobieranie danych opiekuna dla formularza kontaktowego
+            // ULEPSZONE POBIERANIE DANYCH OPIEKUNA
             onSnapshot(doc(db, "users", sid), (userSnap) => {
                 if(userSnap.exists() && userSnap.data().managerId) {
-                    onSnapshot(doc(db, "managers", userSnap.data().managerId), (mSnap) => {
+                    const managerId = userSnap.data().managerId;
+                    
+                    onSnapshot(doc(db, "managers", managerId), (mSnap) => {
                         if(mSnap.exists()) {
                             const mData = mSnap.data();
-                            document.getElementById('manager-name').innerText = mData.name;
-                            document.getElementById('manager-img').src = mData.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(mData.name)}&background=1e3a8a&color=fff`;
-                            document.getElementById('manager-phone-link').href = "tel:" + mData.phone;
-                            document.getElementById('manager-email-link').href = "mailto:" + mData.email;
-                            window.currentManagerEmail = mData.email; 
+                            
+                            // Pobieramy dane lub ustawiamy awaryjne wartości domyślne
+                            const mName = mData.name || "Biuro Obsługi";
+                            const mPhone = mData.phone || "";
+                            const mEmail = mData.email || "kontakt@centralbud.nazwa.pl";
+                            
+                            document.getElementById('manager-name').innerText = mName;
+                            
+                            // Aktualizacja zdjęcia
+                            if (mData.imageUrl) {
+                                document.getElementById('manager-img').src = mData.imageUrl;
+                            } else {
+                                document.getElementById('manager-img').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mName)}&background=1e3a8a&color=fff&size=128`;
+                            }
+                            
+                            // Aktualizacja przycisków kontaktowych (Href)
+                            document.getElementById('manager-phone-link').href = mPhone ? "tel:" + mPhone.replace(/\s/g, '') : "#";
+                            document.getElementById('manager-email-link').href = "mailto:" + mEmail.replace(/\s/g, '') + "?subject=Zapytanie%20B2B";
+                            
+                            // Przekazanie maila do wewnętrznego formularza (EmailJS)
+                            window.currentManagerEmail = mEmail.replace(/\s/g, ''); 
                         }
                     });
                 }
             });
-        } else { showScreen('screen-login'); }
+        } else { 
+            showScreen('screen-login'); 
+        }
     </script>
 </body>
 </html>

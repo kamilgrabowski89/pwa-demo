@@ -22,6 +22,35 @@
             </div>
         </header>
 
+        <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col md:col-span-2">
+            <div class="flex items-center space-x-3 mb-6">
+                <i class="fa-solid fa-envelope-open-text text-2xl text-blue-900"></i>
+                <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Konfiguracja Poczty Wychodzącej</h2>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs text-blue-900 mb-6 font-medium">
+                System korzysta z bezpiecznej bramki pocztowej <b>EmailJS</b>. Podłącz swoją skrzynkę (np. Gmail) na emailjs.com i wklej klucze poniżej, aby formularze od klientów trafiały wprost do opiekunów.
+            </div>
+            
+            <form id="form-mail-settings" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">Public Key (Publiczny Klucz API)</label>
+                    <input type="text" id="mail-public-key" placeholder="np. aBCdEfGHI12345" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-sm text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">Service ID (ID Usługi)</label>
+                    <input type="text" id="mail-service-id" placeholder="np. service_xyz123" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-sm text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">Template ID (Szablon Wiadomości)</label>
+                    <input type="text" id="mail-template-id" placeholder="np. template_abc123" required class="w-full border-2 border-slate-200 rounded-xl p-3 bg-slate-50 outline-none focus:border-red-600 font-bold text-sm text-slate-700">
+                </div>
+                <div class="md:col-span-3 mt-2">
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-lg cursor-pointer uppercase tracking-widest text-xs hover:bg-slate-800 transition">Zapisz konfigurację poczty</button>
+                    <p id="mail-status" class="text-sm text-center text-green-600 font-bold hidden mt-2">Dane EmailJS zostały zapisane!</p>
+                </div>
+            </form>
+        </section>
+
         <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
             <div class="flex items-center space-x-3 mb-6">
                 <i class="fa-solid fa-sliders text-2xl text-red-600"></i>
@@ -164,7 +193,6 @@
                     <p class="text-sm text-slate-500 italic">Ładowanie komunikatów...</p>
                 </div>
             </section>
-
         </div>
     </div>
 
@@ -173,6 +201,7 @@
         import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+        // TUTAJ SĄ TWOJE DANE POŁĄCZENIA FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCJiTF066XNnH-yLGVNn6XcYD4X37I9UDM",
             projectId: "aplikacja-608f2",
@@ -182,7 +211,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
+        
         const settingsRef = doc(db, "settings", "ui_config");
+        const mailConfigRef = doc(db, "settings", "mail_config");
 
         let pendingUsersGlobalList = [];
         let allMessagesAdminData = [];
@@ -199,7 +230,18 @@
                 if(data.tab4) document.getElementById('tab4-name').value = data.tab4;
             }
         });
+        
+        // --- KONFIGURACJA POCZTY W PANELU ADMINA ---
+        getDoc(mailConfigRef).then((docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if(data.emailjsKey) document.getElementById('mail-public-key').value = data.emailjsKey;
+                if(data.emailjsServiceId) document.getElementById('mail-service-id').value = data.emailjsServiceId;
+                if(data.emailjsTemplateId) document.getElementById('mail-template-id').value = data.emailjsTemplateId;
+            }
+        });
 
+        // ZAPIS ZAKŁADEK
         document.getElementById('form-settings').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = e.target.querySelector('button'); btn.disabled = true;
             try {
@@ -208,6 +250,20 @@
                 }, { merge: true });
                 document.getElementById('settings-status').classList.remove('hidden');
                 setTimeout(() => { document.getElementById('settings-status').classList.add('hidden'); btn.disabled = false; }, 3000);
+            } catch (e) { btn.disabled = false; }
+        });
+        
+        // ZAPIS DANYCH EMAILJS
+        document.getElementById('form-mail-settings').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = e.target.querySelector('button'); btn.disabled = true;
+            try {
+                await setDoc(mailConfigRef, {
+                    emailjsKey: document.getElementById('mail-public-key').value.trim(), 
+                    emailjsServiceId: document.getElementById('mail-service-id').value.trim(), 
+                    emailjsTemplateId: document.getElementById('mail-template-id').value.trim()
+                }, { merge: true });
+                document.getElementById('mail-status').classList.remove('hidden');
+                setTimeout(() => { document.getElementById('mail-status').classList.add('hidden'); btn.disabled = false; }, 3000);
             } catch (e) { btn.disabled = false; }
         });
 
@@ -231,24 +287,20 @@
             const status = document.getElementById('msg-status');
             const file = document.getElementById('msg-image').files[0];
             
-            // Pobieranie wartości Kalendarza
             const isEvent = document.getElementById('msg-is-event').checked;
             const eventStart = document.getElementById('msg-event-start').value;
             const eventEnd = document.getElementById('msg-event-end').value;
             const eventLoc = document.getElementById('msg-event-location').value;
 
             if (isEvent && (!eventStart || !eventEnd)) {
-                alert("Jeśli to wydarzenie, musisz podać datę startu i końca!");
-                return;
+                alert("Jeśli to wydarzenie, musisz podać datę startu i końca!"); return;
             }
             
-            // Pobieranie wartości Linku
             const hasLink = document.getElementById('msg-has-link').checked;
             const linkUrl = document.getElementById('msg-link-url').value.trim();
             
             if (hasLink && !linkUrl) {
-                alert("Jeśli chcesz dodać link zewnętrzny, musisz wypełnić adres URL!");
-                return;
+                alert("Jeśli chcesz dodać link zewnętrzny, musisz wypełnić adres URL!"); return;
             }
 
             btn.disabled = true; 
@@ -297,7 +349,6 @@
                     cancelEdit();
                 }, 2000);
             } catch (error) { 
-                console.error("Szczegóły błędu z Firebase:", error);
                 status.innerText = "BŁĄD: " + error.message; 
                 status.className = "text-xs text-left font-bold mt-2 text-red-600 bg-red-50 p-3 rounded-lg";
                 btn.disabled = false; 
@@ -348,7 +399,7 @@
             });
         });
 
-        // --- FUNKCJE EDYCJI ---
+        // --- FUNKCJE EDYCJI KOMUNIKATÓW ---
         window.editMessage = function(docId) {
             const msg = allMessagesAdminData.find(m => m.id === docId);
             if(!msg) return;
@@ -361,7 +412,6 @@
             document.getElementById('msg-preview').value = msg.preview || "";
             document.getElementById('msg-body').value = msg.body || "";
             
-            // Obsługa Wydarzenia (Kalendarz)
             const isEv = msg.isEvent || false;
             document.getElementById('msg-is-event').checked = isEv;
             document.getElementById('event-fields').classList.toggle('hidden', !isEv);
@@ -369,31 +419,24 @@
             document.getElementById('msg-event-end').value = msg.eventEnd || "";
             document.getElementById('msg-event-location').value = msg.eventLocation || "";
             
-            // Obsługa Zewnętrznego Linku
             const isLnk = msg.hasLink || false;
             document.getElementById('msg-has-link').checked = isLnk;
             document.getElementById('link-fields').classList.toggle('hidden', !isLnk);
             document.getElementById('msg-link-url').value = msg.linkUrl || "";
 
-            // Przestawienie interfejsu
             document.getElementById('form-msg-title-header').innerText = "Edytuj Opublikowany Komunikat";
             document.getElementById('btn-message-send').innerText = "Zapisz Zmiany";
             document.getElementById('btn-message-cancel').classList.remove('hidden');
             
-            if(currentEditImageUrl !== "") {
-                document.getElementById('edit-image-info').classList.remove('hidden');
-            } else {
-                document.getElementById('edit-image-info').classList.add('hidden');
-            }
+            if(currentEditImageUrl !== "") document.getElementById('edit-image-info').classList.remove('hidden');
+            else document.getElementById('edit-image-info').classList.add('hidden');
 
             window.scrollTo({ top: document.getElementById('message-form-section').offsetTop - 30, behavior: 'smooth' });
         };
 
         window.cancelEdit = function() {
-            currentEditMessageId = null;
-            currentEditImageUrl = "";
+            currentEditMessageId = null; currentEditImageUrl = "";
             document.getElementById('form-new-message').reset();
-            
             document.getElementById('event-fields').classList.add('hidden');
             document.getElementById('link-fields').classList.add('hidden');
             document.getElementById('edit-image-info').classList.add('hidden');
@@ -403,13 +446,11 @@
         };
 
         window.deleteMessage = async function(docId) {
-            if(confirm("Czy na pewno chcesz bezpowrotnie usunąć ten komunikat? Zniknie on natychmiast u wszystkich klientów.")) {
+            if(confirm("Czy na pewno chcesz bezpowrotnie usunąć ten komunikat?")) {
                 try {
                     await deleteDoc(doc(db, "messages", docId));
                     if(currentEditMessageId === docId) cancelEdit();
-                } catch (e) {
-                    alert("Błąd podczas usuwania: " + e.message);
-                }
+                } catch (e) { alert("Błąd: " + e.message); }
             }
         };
 
@@ -417,7 +458,6 @@
         function renderPendingUsersSection() {
             const pendingListContainer = document.getElementById('pending-users-list');
             pendingListContainer.innerHTML = '';
-            
             if(pendingUsersGlobalList.length === 0) {
                 pendingListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak nowych wniosków</div>`; return;
             }
@@ -447,24 +487,23 @@
 
         window.approveUserWithManager = async function(docId, email) {
             const selectedManagerId = document.getElementById(`input-manager-${docId}`).value.trim();
-            if(!selectedManagerId) { alert("Błąd: Musisz podać ID opiekuna przed akceptacją!"); return; }
+            if(!selectedManagerId) { alert("Błąd: Musisz podać ID opiekuna!"); return; }
             const pin = Math.floor(100000 + Math.random() * 900000).toString();
             await updateDoc(doc(db, "users", docId), { status: 'approved', pin: pin, managerId: selectedManagerId });
-            const subject = encodeURIComponent("Dostęp do platformy Instalbud B2B - Twój Kod PIN");
-            const body = encodeURIComponent(`Dzień dobry,\n\nTwój wniosek o dostęp do platformy B2B został pomyślnie zweryfikowany.\n\nTwój indywidualny kod PIN do aktywacji konta to: ${pin}\n\nPozdrawiamy,\nZespół Instalbud`);
+            const subject = encodeURIComponent("Dostęp do platformy Instalbud B2B");
+            const body = encodeURIComponent(`Dzień dobry,\n\nTwój wniosek o dostęp do platformy B2B został pomyślnie zweryfikowany.\n\nTwój kod PIN do aktywacji konta to: ${pin}\n\nPozdrawiamy,\nZespół Instalbud`);
             window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         };
 
-        window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) { await deleteDoc(doc(db, "users", docId)); } };
+        window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) await deleteDoc(doc(db, "users", docId)); };
 
-        // --- NOWY MODUŁ: ZARZĄDZANIE KONTAMI KLIENTÓW (CRM) ---
+        // --- ZARZĄDZANIE KONTAMI KLIENTÓW (CRM) ---
         onSnapshot(query(collection(db, "users"), where("status", "in", ["approved", "active"])), (snapshot) => {
             const clientsListContainer = document.getElementById('active-clients-list');
             clientsListContainer.innerHTML = '';
             
             if(snapshot.empty) {
-                clientsListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak zarejestrowanych klientów.</div>`;
-                return;
+                clientsListContainer.innerHTML = `<div class="bg-slate-50 border-2 border-dashed p-6 rounded-2xl text-center text-sm font-bold text-slate-400">Brak zarejestrowanych klientów.</div>`; return;
             }
 
             snapshot.forEach((docSnap) => {
@@ -473,7 +512,6 @@
                 
                 const card = document.createElement('div');
                 card.className = "border-2 border-slate-200 p-5 rounded-2xl bg-white shadow-sm hover:shadow-md transition";
-                
                 card.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -493,7 +531,7 @@
                             <input type="text" id="edit-phone-${id}" value="${user.phone || ''}" class="w-full border-2 border-slate-200 p-2 rounded-lg text-sm bg-slate-50 focus:border-red-600 outline-none">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna Handlowego (z bazy Firebase)</label>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">ID Opiekuna (z bazy Firebase)</label>
                             <input type="text" id="edit-manager-${id}" value="${user.managerId || ''}" class="w-full border-2 border-blue-200 focus:border-blue-600 outline-none p-2 rounded-lg text-sm font-bold bg-blue-50">
                         </div>
                     </div>
@@ -516,10 +554,8 @@
                     phone: document.getElementById(`edit-phone-${docId}`).value.trim(),
                     managerId: document.getElementById(`edit-manager-${docId}`).value.trim()
                 });
-                alert("Dane klienta zostały zaktualizowane pomyślnie.");
-            } catch (e) {
-                alert("Błąd podczas aktualizacji: " + e.message);
-            }
+                alert("Dane klienta zaktualizowane pomyślnie.");
+            } catch (e) { alert("Błąd: " + e.message); }
         };
 
     </script>

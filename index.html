@@ -416,11 +416,14 @@
                 
                 const targetEmail = window.currentManagerEmail || "kontakt@centralbud.nazwa.pl";
                 
-                // WYWOŁANIE EMAILJS
+               // WYWOŁANIE EMAILJS
+                const userEmail = localStorage.getItem('userEmail') || "brak@danych.pl";
+                
                 await emailjs.send(mailServiceConfig.emailjsServiceId, mailServiceConfig.emailjsTemplateId, {
                     to_email: targetEmail,
                     client_name: compName,
                     client_phone: compPhone,
+                    client_email: userEmail, // <-- Brakująca zmienna!
                     message: inquiryBody,
                     attachment_link: uploadedFileUrl || "Brak załącznika"
                 });

@@ -52,11 +52,11 @@
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- PUBLIKOWANIE KOMUNIKATÓW -->
-            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100">
+            <!-- PUBLIKOWANIE I EDYCJA KOMUNIKATÓW -->
+            <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100" id="message-form-section">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-paper-plane text-2xl text-red-600"></i>
-                    <h2 class="text-xl font-black text-blue-900 uppercase tracking-tight">Opublikuj Komunikat / Promocję</h2>
+                    <h2 id="form-msg-title-header" class="text-xl font-black text-blue-900 uppercase tracking-tight">Opublikuj Komunikat / Promocję</h2>
                 </div>
                 <form id="form-new-message" class="space-y-5">
                     <div>
@@ -69,8 +69,9 @@
                         </select>
                     </div>
                     <div class="border-2 border-slate-100 p-4 rounded-xl bg-slate-50">
-                        <label class="block text-xs font-bold mb-2 text-slate-500 uppercase">Dodaj grafikę (opcjonalnie)</label>
+                        <label class="block text-xs font-bold mb-2 text-slate-500 uppercase">Dodaj lub zmień grafikę</label>
                         <input type="file" id="msg-image" accept="image/*" class="w-full text-xs text-slate-500">
+                        <p id="edit-image-info" class="text-[10px] text-blue-600 font-bold mt-2 hidden"><i class="fa-solid fa-circle-info mr-1"></i>Ten komunikat ma już przypisaną grafikę. Zostaw to pole puste, aby ją zachować.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-500 uppercase">Tytuł</label>
@@ -108,7 +109,10 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="btn-message-send" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer">Opublikuj Komunikat</button>
+                    <div class="flex space-x-3">
+                        <button type="submit" id="btn-message-send" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-red-700 transition-colors">Opublikuj Komunikat</button>
+                        <button type="button" id="btn-message-cancel" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-200 text-slate-700 font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-slate-300 transition-colors">Anuluj</button>
+                    </div>
                     <p id="msg-status" class="hidden text-sm text-center font-bold mt-2"></p>
                 </form>
             </section>
@@ -127,7 +131,7 @@
                 </div>
             </section>
 
-            <!-- NOWY MODUŁ: LISTA OPUBLIKOWANYCH KOMUNIKATÓW -->
+            <!-- MODUŁ: LISTA OPUBLIKOWANYCH KOMUNIKATÓW Z EDYCJĄ -->
             <section class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-slate-100 flex flex-col md:col-span-2">
                 <div class="flex items-center space-x-3 mb-6">
                     <i class="fa-solid fa-list-check text-2xl text-blue-900"></i>
@@ -158,7 +162,13 @@
         const settingsRef = doc(db, "settings", "ui_config");
 
         let pendingUsersGlobalList = [];
+        
+        // Zmienne do logiki Edycji
+        let allMessagesAdminData = [];
+        let currentEditMessageId = null;
+        let currentEditImageUrl = "";
 
+        // --- WNIOSKI ---
         function renderPendingUsersSection() {
             const pendingListContainer = document.getElementById('pending-users-list');
             pendingListContainer.innerHTML = '';
@@ -170,7 +180,6 @@
             pendingUsersGlobalList.forEach((user) => {
                 const card = document.createElement('div');
                 card.className = "border-2 border-slate-100 p-5 rounded-2xl space-y-3 bg-slate-50 shadow-sm text-slate-900";
-
                 card.innerHTML = `
                     <div class="flex justify-between items-start"><strong class="text-blue-900 font-black text-base">${user.companyName}</strong><span class="text-xs font-bold text-slate-500 bg-white px-2 py-0.5 rounded border">NIP: ${user.nip}</span></div>
                     <p class="text-xs font-semibold text-slate-600">${user.email} | Tel: ${user.phone}</p>
@@ -203,6 +212,7 @@
 
         window.rejectUser = async function(docId) { if(confirm("Usunąć wniosek?")) { await deleteDoc(doc(db, "users", docId)); } };
 
+        // --- ZAKŁADKI ---
         getDoc(settingsRef).then((docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
@@ -224,18 +234,19 @@
             } catch (e) { btn.disabled = false; }
         });
 
+        // --- OBSŁUGA WYDARZEŃ UI ---
         document.getElementById('msg-is-event').addEventListener('change', function() {
             const eventFields = document.getElementById('event-fields');
-            if(this.checked) {
-                eventFields.classList.remove('hidden');
-            } else {
-                eventFields.classList.add('hidden');
-            }
+            if(this.checked) eventFields.classList.remove('hidden');
+            else eventFields.classList.add('hidden');
         });
 
+
+        // --- LOGIKA FORMULARZA KOMUNIKATU (TWORZENIE I EDYCJA) ---
         document.getElementById('form-new-message').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btn-message-send'); const status = document.getElementById('msg-status');
+            const btn = document.getElementById('btn-message-send'); 
+            const status = document.getElementById('msg-status');
             const file = document.getElementById('msg-image').files[0];
             
             const isEvent = document.getElementById('msg-is-event').checked;
@@ -248,8 +259,12 @@
                 return;
             }
 
-            btn.disabled = true; status.innerText = "Publikowanie..."; status.className = "text-xs text-center font-bold mt-2 text-blue-900 animate-pulse"; status.classList.remove('hidden');
-            let imageUrl = "";
+            btn.disabled = true; 
+            status.innerText = currentEditMessageId ? "Zapisywanie zmian..." : "Publikowanie..."; 
+            status.className = "text-xs text-center font-bold mt-2 text-blue-900 animate-pulse"; 
+            status.classList.remove('hidden');
+            
+            let imageUrl = currentEditImageUrl; // Zostaw stary link, jeśli nie wybrano nowego zdjęcia
 
             try {
                 if (file) {
@@ -257,31 +272,49 @@
                     const uploadSnap = await uploadBytes(storageRef, file);
                     imageUrl = await getDownloadURL(uploadSnap.ref);
                 }
-                const today = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
                 
-                await addDoc(collection(db, "messages"), {
+                const msgData = {
                     category: document.getElementById('msg-category').value, 
                     title: document.getElementById('msg-title').value, 
                     imageUrl: imageUrl, 
                     preview: document.getElementById('msg-preview').value, 
                     body: document.getElementById('msg-body').value, 
-                    date: today, 
-                    createdAt: new Date(),
                     isEvent: isEvent,
                     eventStart: isEvent ? eventStart : null,
                     eventEnd: isEvent ? eventEnd : null,
                     eventLocation: isEvent ? eventLoc : null
-                });
+                };
+
+                if (currentEditMessageId) {
+                    // Tryb edycji: Aktualizacja istniejącego dokumentu
+                    await updateDoc(doc(db, "messages", currentEditMessageId), msgData);
+                    status.innerText = "Zmiany zostały pomyślnie zapisane!";
+                } else {
+                    // Tryb tworzenia: Nowy wpis
+                    msgData.date = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric' });
+                    msgData.createdAt = new Date();
+                    await addDoc(collection(db, "messages"), msgData);
+                    status.innerText = "Komunikat opublikowany!";
+                }
                 
-                status.className = "text-xs text-center font-bold mt-2 text-green-600 bg-green-50 p-2 rounded-lg"; status.innerText = "Opublikowano!";
-                e.target.reset(); 
-                document.getElementById('event-fields').classList.add('hidden');
-                setTimeout(() => { status.classList.add('hidden'); btn.disabled = false; }, 3000);
-            } catch (error) { status.innerText = "Błąd."; btn.disabled = false; }
+                status.className = "text-xs text-center font-bold mt-2 text-green-600 bg-green-50 p-2 rounded-lg"; 
+                
+                // Zresetuj formularz całkowicie po sukcesie
+                setTimeout(() => { 
+                    status.classList.add('hidden'); 
+                    btn.disabled = false;
+                    cancelEdit(); // wraca do trybu "Tworzenia"
+                }, 2000);
+            } catch (error) { 
+                status.innerText = "Wystąpił błąd podczas zapisywania."; 
+                status.className = "text-xs text-center font-bold mt-2 text-red-600 bg-red-50 p-2 rounded-lg";
+                btn.disabled = false; 
+            }
         });
 
-        // --- NOWY MODUŁ: ZARZĄDZANIE OPUBLIKOWANYMI KOMUNIKATAMI ---
+        // --- LISTA OPUBLIKOWANYCH KOMUNIKATÓW (Z PRZYCISKIEM EDYCJI) ---
         onSnapshot(query(collection(db, "messages"), orderBy("createdAt", "desc")), (snapshot) => {
+            allMessagesAdminData = [];
             const messagesListContainer = document.getElementById('published-messages-list');
             messagesListContainer.innerHTML = '';
             
@@ -293,6 +326,8 @@
             snapshot.forEach((docSnap) => {
                 const msg = docSnap.data();
                 const id = docSnap.id;
+                allMessagesAdminData.push({ id: id, ...msg }); // Zapisz do pamięci dla trybu edycji
+                
                 const card = document.createElement('div');
                 card.className = "border-2 border-slate-100 p-4 rounded-xl flex justify-between items-center bg-slate-50 shadow-sm transition hover:shadow-md";
                 
@@ -307,18 +342,77 @@
                         </div>
                         <h3 class="font-bold text-blue-900 text-sm truncate" title="${msg.title}">${msg.title}</h3>
                     </div>
-                    <button onclick="deleteMessage('${id}')" class="bg-white border border-red-200 text-red-600 w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors shadow-sm" title="Usuń ten komunikat">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div class="flex space-x-2 flex-shrink-0">
+                        <button onclick="editMessage('${id}')" class="bg-white border border-blue-200 text-blue-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors shadow-sm" title="Edytuj ten komunikat">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteMessage('${id}')" class="bg-white border border-red-200 text-red-600 w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors shadow-sm" title="Usuń ten komunikat">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
                 `;
                 messagesListContainer.appendChild(card);
             });
         });
 
+        // --- FUNKCJE EDYCJI ---
+        window.editMessage = function(docId) {
+            const msg = allMessagesAdminData.find(m => m.id === docId);
+            if(!msg) return;
+
+            // Ustaw flagi
+            currentEditMessageId = docId;
+            currentEditImageUrl = msg.imageUrl || "";
+
+            // Wypełnij formularz danymi
+            document.getElementById('msg-category').value = msg.category || "komunikaty";
+            document.getElementById('msg-title').value = msg.title || "";
+            document.getElementById('msg-preview').value = msg.preview || "";
+            document.getElementById('msg-body').value = msg.body || "";
+            
+            // Obsługa wydarzenia
+            const isEv = msg.isEvent || false;
+            const checkboxEvent = document.getElementById('msg-is-event');
+            checkboxEvent.checked = isEv;
+            document.getElementById('event-fields').classList.toggle('hidden', !isEv);
+            document.getElementById('msg-event-start').value = msg.eventStart || "";
+            document.getElementById('msg-event-end').value = msg.eventEnd || "";
+            document.getElementById('msg-event-location').value = msg.eventLocation || "";
+
+            // Przestawienie interfejsu w tryb EDYCJI
+            document.getElementById('form-msg-title-header').innerText = "Edytuj Opublikowany Komunikat";
+            document.getElementById('btn-message-send').innerText = "Zapisz Zmiany";
+            document.getElementById('btn-message-cancel').classList.remove('hidden');
+            
+            // Informacja o grafice
+            if(currentEditImageUrl !== "") {
+                document.getElementById('edit-image-info').classList.remove('hidden');
+            } else {
+                document.getElementById('edit-image-info').classList.add('hidden');
+            }
+
+            // Płynne przewinięcie do formularza
+            window.scrollTo({ top: document.getElementById('message-form-section').offsetTop - 30, behavior: 'smooth' });
+        };
+
+        window.cancelEdit = function() {
+            currentEditMessageId = null;
+            currentEditImageUrl = "";
+            document.getElementById('form-new-message').reset();
+            
+            // Powrót interfejsu do trybu TWORZENIA
+            document.getElementById('event-fields').classList.add('hidden');
+            document.getElementById('edit-image-info').classList.add('hidden');
+            document.getElementById('form-msg-title-header').innerText = "Opublikuj Komunikat / Promocję";
+            document.getElementById('btn-message-send').innerText = "Opublikuj Komunikat";
+            document.getElementById('btn-message-cancel').classList.add('hidden');
+        };
+
         window.deleteMessage = async function(docId) {
             if(confirm("Czy na pewno chcesz bezpowrotnie usunąć ten komunikat? Zniknie on natychmiast u wszystkich klientów.")) {
                 try {
                     await deleteDoc(doc(db, "messages", docId));
+                    if(currentEditMessageId === docId) cancelEdit(); // Zresetuj formularz, jeśli usunięto właśnie edytowany wpis
                 } catch (e) {
                     alert("Błąd podczas usuwania: " + e.message);
                 }

@@ -128,7 +128,7 @@
                         <button type="submit" id="btn-message-send" class="w-full bg-red-600 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-red-700 transition-colors">Opublikuj Komunikat</button>
                         <button type="button" id="btn-message-cancel" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-200 text-slate-700 font-black py-4 rounded-xl uppercase tracking-widest text-xs cursor-pointer hover:bg-slate-300 transition-colors">Anuluj</button>
                     </div>
-                    <p id="msg-status" class="hidden text-sm text-center font-bold mt-2"></p>
+                    <p id="msg-status" class="hidden text-sm text-center font-bold mt-2 break-words whitespace-pre-wrap"></p>
                 </form>
             </section>
 
@@ -333,8 +333,9 @@
                     cancelEdit();
                 }, 2000);
             } catch (error) { 
-                status.innerText = "Wystąpił błąd podczas zapisywania."; 
-                status.className = "text-xs text-center font-bold mt-2 text-red-600 bg-red-50 p-2 rounded-lg";
+                console.error("Szczegóły błędu z Firebase:", error);
+                status.innerText = "BŁĄD: " + error.message; 
+                status.className = "text-xs text-left font-bold mt-2 text-red-600 bg-red-50 p-3 rounded-lg";
                 btn.disabled = false; 
             }
         });

@@ -479,8 +479,25 @@
                                     document.getElementById('manager-img').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mName)}&background=1e3a8a&color=fff&size=128`;
                                 }
                                 
-                                document.getElementById('manager-phone-link').href = mPhone ? "tel:" + mPhone.replace(/\s/g, '') : "#";
-                                document.getElementById('manager-email-link').href = mEmail ? "mailto:" + mEmail.replace(/\s/g, '') + "?subject=Zapytanie%20B2B" : "#";
+                               // Konfiguracja przycisku telefonu
+document.getElementById('manager-phone-link').href = mPhone ? "tel:" + mPhone.replace(/\s/g, '') : "#";
+
+// Wymuszenie otwarcia programu pocztowego (Twarde przekierowanie dla urządzeń mobilnych/PWA)
+const btnEmail = document.getElementById('manager-email-link');
+if (mEmail) {
+    const mailtoStr = "mailto:" + mEmail.replace(/\s/g, '') + "?subject=Zapytanie%20B2B";
+    btnEmail.href = mailtoStr; // Awaryjny atrybut href
+    btnEmail.onclick = function(e) {
+        e.preventDefault(); // Blokuje blokady przeglądarki
+        window.location.href = mailtoStr; // Wymusza otwarcie poczty
+    };
+} else {
+    btnEmail.href = "#";
+    btnEmail.onclick = function(e) {
+        e.preventDefault();
+        alert("Opiekun nie ma uzupełnionego adresu e-mail w bazie danych.");
+    };
+}
                                 
                                 if(mEmail) window.currentManagerEmail = mEmail.replace(/\s/g, ''); 
                             } else {

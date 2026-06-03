@@ -442,7 +442,7 @@
             }
         });
 
-// WZNOWIENIE SESJI (AUTOLOGOWANIE)
+// WZNOWIENIE SESJI (AUTOLOGOWANIE) - WERSJA DIAGNOSTYCZNA
         const sid = localStorage.getItem('userDocId');
         if(sid) { 
             verifiedUserId = sid; showScreen('screen-app'); 
@@ -451,37 +451,50 @@
             document.getElementById('user-phone').innerText = localStorage.getItem('userPhone');
             window.currentManagerEmail = "kontakt@centralbud.nazwa.pl"; 
 
-            // ULEPSZONE POBIERANIE DANYCH OPIEKUNA
+            console.log("1. Szukam klienta o ID:", sid);
+
+            // Pobieranie danych opiekuna
             onSnapshot(doc(db, "users", sid), (userSnap) => {
-                if(userSnap.exists() && userSnap.data().managerId) {
-                    const managerId = userSnap.data().managerId;
+                if(userSnap.exists()) {
+                    const userData = userSnap.data();
+                    console.log("2. Klient znaleziony. Jego wpisane ID opiekuna to:", userData.managerId);
                     
-                    onSnapshot(doc(db, "managers", managerId), (mSnap) => {
-                        if(mSnap.exists()) {
-                            const mData = mSnap.data();
-                            
-                            // Pobieramy dane lub ustawiamy awaryjne wartości domyślne
-                            const mName = mData.name || "Biuro Obsługi";
-                            const mPhone = mData.phone || "";
-                            const mEmail = mData.email || "kontakt@centralbud.nazwa.pl";
-                            
-                            document.getElementById('manager-name').innerText = mName;
-                            
-                            // Aktualizacja zdjęcia
-                            if (mData.imageUrl) {
-                                document.getElementById('manager-img').src = mData.imageUrl;
+                    if(userData.managerId) {
+                        const managerId = userData.managerId;
+                        
+                        onSnapshot(doc(db, "managers", managerId), (mSnap) => {
+                            if(mSnap.exists()) {
+                                const mData = mSnap.data();
+                                console.log("3. ZNALEZIONO OPIEKUNA! Jego dane:", mData);
+                                
+                                const mName = mData.name || "Biuro Obsługi (brak imienia w bazie)";
+                                const mPhone = mData.phone || "";
+                                const mEmail = mData.email || "";
+                                
+                                document.getElementById('manager-name').innerText = mName;
+                                
+                                if (mData.imageUrl) {
+                                    document.getElementById('manager-img').src = mData.imageUrl;
+                                } else {
+                                    document.getElementById('manager-img').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mName)}&background=1e3a8a&color=fff&size=128`;
+                                }
+                                
+                                document.getElementById('manager-phone-link').href = mPhone ? "tel:" + mPhone.replace(/\s/g, '') : "#";
+                                document.getElementById('manager-email-link').href = mEmail ? "mailto:" + mEmail.replace(/\s/g, '') + "?subject=Zapytanie%20B2B" : "#";
+                                
+                                if(mEmail) window.currentManagerEmail = mEmail.replace(/\s/g, ''); 
                             } else {
-                                document.getElementById('manager-img').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(mName)}&background=1e3a8a&color=fff&size=128`;
+                                console.error("BŁĄD: W kolekcji 'managers' NIE MA dokumentu o nazwie:", managerId);
+                                document.getElementById('manager-name').innerText = "Błąd: Złe ID opiekuna!";
+                                document.getElementById('manager-name').classList.add('text-red-600');
                             }
-                            
-                            // Aktualizacja przycisków kontaktowych (Href)
-                            document.getElementById('manager-phone-link').href = mPhone ? "tel:" + mPhone.replace(/\s/g, '') : "#";
-                            document.getElementById('manager-email-link').href = "mailto:" + mEmail.replace(/\s/g, '') + "?subject=Zapytanie%20B2B";
-                            
-                            // Przekazanie maila do wewnętrznego formularza (EmailJS)
-                            window.currentManagerEmail = mEmail.replace(/\s/g, ''); 
-                        }
-                    });
+                        }, (error) => {
+                            console.error("Błąd pobierania z bazy (brak uprawnień?):", error);
+                        });
+                    } else {
+                        console.warn("Ten klient ma puste pole ID Opiekuna w panelu Admina.");
+                        document.getElementById('manager-name').innerText = "Brak ID opiekuna";
+                    }
                 }
             });
         } else { 
